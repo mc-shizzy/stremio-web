@@ -25,7 +25,7 @@ const ALLOWED_LINK_REDIRECTS = [
     routesRegexp.metadetails.regexp
 ];
 
-const MetaPreview = React.forwardRef(({ className, compact, name, logo, background, runtime, releaseInfo, released, description, deepLinks, links, trailerStreams, inLibrary, toggleInLibrary, ratingInfo }, ref) => {
+const MetaPreview = React.forwardRef(({ className, compact, name, logo, background, runtime, releaseInfo, released, description, deepLinks, links, trailerStreams, inLibrary, toggleInLibrary, watched, toggleWatched, ratingInfo }, ref) => {
     const { t } = useTranslation();
     const [shareModalOpen, openShareModal, closeShareModal] = useBinaryState(false);
     const linksGroups = React.useMemo(() => {
@@ -222,6 +222,19 @@ const MetaPreview = React.forwardRef(({ className, compact, name, logo, backgrou
                         null
                 }
                 {
+                    typeof toggleWatched === 'function' ?
+                        <ActionButton
+                            className={styles['action-button']}
+                            icon={watched ? 'eye-off' : 'eye'}
+                            label={watched ? t('CTX_MARK_UNWATCHED') : t('CTX_MARK_WATCHED')}
+                            tooltip={compact}
+                            tabIndex={compact ? -1 : 0}
+                            onClick={toggleWatched}
+                        />
+                        :
+                        null
+                }
+                {
                     typeof showHref === 'string' && compact ?
                         <ActionButton
                             className={classnames(styles['action-button'], styles['show-button'])}
@@ -298,6 +311,8 @@ MetaPreview.propTypes = {
     trailerStreams: PropTypes.array,
     inLibrary: PropTypes.bool,
     toggleInLibrary: PropTypes.func,
+    watched: PropTypes.bool,
+    toggleWatched: PropTypes.func,
     ratingInfo: PropTypes.object,
 };
 
