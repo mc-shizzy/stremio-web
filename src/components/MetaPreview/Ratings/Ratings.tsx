@@ -2,9 +2,7 @@
 
 import React, { useMemo } from 'react';
 import useRating from './useRating';
-import styles from './Ratings.less';
-import Icon from '@stremio/stremio-icons/react';
-import classNames from 'classnames';
+import { IconsGroup } from 'stremio/components/IconsGroup';
 
 type Props = {
     metaId?: string;
@@ -15,17 +13,20 @@ type Props = {
 const Ratings = ({ ratingInfo, className }: Props) => {
     const { onLiked, onLoved, liked, loved } = useRating(ratingInfo);
     const disabled = useMemo(() => ratingInfo?.type !== 'Ready', [ratingInfo]);
+    const items = useMemo(() => [
+        {
+            icon: liked ? 'thumbs-up' : 'thumbs-up-outline',
+            disabled,
+            onClick: onLiked,
+        },
+        {
+            icon: loved ? 'heart' : 'heart-outline',
+            disabled,
+            onClick: onLoved,
+        },
+    ], [liked, loved, disabled, onLiked, onLoved]);
 
-    return (
-        <div className={classNames(styles['ratings-container'], className)}>
-            <div className={classNames(styles['icon-container'], { [styles['disabled']]: disabled })} onClick={onLiked}>
-                <Icon name={liked ? 'thumbs-up' : 'thumbs-up-outline'} className={styles['icon']} />
-            </div>
-            <div className={classNames(styles['icon-container'], { [styles['disabled']]: disabled })} onClick={onLoved}>
-                <Icon name={loved ? 'heart' : 'heart-outline'} className={styles['icon']} />
-            </div>
-        </div>
-    );
+    return <IconsGroup items={items} className={className} />;
 };
 
 export default Ratings;

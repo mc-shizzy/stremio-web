@@ -6,7 +6,7 @@ const classnames = require('classnames');
 const MetaItem = require('stremio/components/MetaItem');
 const { t } = require('i18next');
 
-const DiscItem = ({ id, watched, selected, toggleWatched, select, ...props }) => {
+const DiscItem = ({ id, watched, selected, toggleWatched, ...props }) => {
 
     const options = React.useMemo(() => {
         return [
