@@ -1,15 +1,12 @@
 // Copyright (C) 2017-2023 Smart code 203358507
 
 const React = require('react');
-const { useServices } = require('stremio/services');
 const PropTypes = require('prop-types');
 const classnames = require('classnames');
 const MetaItem = require('stremio/components/MetaItem');
 const { t } = require('i18next');
 
-const DiscItem = ({ id, watched, selected, toggleWatched, ...props }) => {
-
-    const { core } = useServices();
+const DiscItem = ({ id, watched, selected, toggleWatched, select, ...props }) => {
 
     const options = React.useMemo(() => {
         return [

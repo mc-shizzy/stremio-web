@@ -74,17 +74,17 @@ const Discover = ({ urlParams, queryParams }) => {
             }
         });
     }, [selectedMetaItem]);
-    const toggleWatched = React.useCallback(() => {
-        if (selectedMetaItem === null) {
+    const toggleWatched = React.useCallback((item) => {
+        if (item === null) {
             return;
         }
 
-        if (!selectedMetaItem.inLibrary) {
+        if (!item.inLibrary) {
             core.transport.dispatch({
                 action: 'Ctx',
                 args: {
                     action: 'AddToLibrary',
-                    args: selectedMetaItem
+                    args: item
                 }
             });
         }
@@ -94,12 +94,12 @@ const Discover = ({ urlParams, queryParams }) => {
             args: {
                 action: 'LibraryItemMarkAsWatched',
                 args: {
-                    id: selectedMetaItem.id,
-                    is_watched: !selectedMetaItem.watched
+                    id: item.id,
+                    is_watched: !item.watched
                 }
             }
         });
-    }, [selectedMetaItem]);
+    }, []);
     const metaItemsOnFocusCapture = React.useCallback((event) => {
         if (event.target.dataset.index !== null && !isNaN(event.target.dataset.index)) {
             setSelectedMetaItemIndex(parseInt(event.target.dataset.index, 10));
@@ -184,7 +184,7 @@ const Discover = ({ urlParams, queryParams }) => {
                                     :
                                     <div ref={metasContainerRef} className={classnames(styles['meta-items-container'], 'animation-fade-in')} onScroll={onScroll} onFocusCapture={metaItemsOnFocusCapture}>
                                         {discover.catalog.content.content.map((discItem, index) => (
-                                            <DiscItem {...discItem} toggleWatched={toggleWatched} selected={selectedMetaItemIndex === index} key={index} data-index={index} onClick={metaItemOnClick} />
+                                            <DiscItem {...discItem} toggleWatched={() => toggleWatched(discItem)} selected={selectedMetaItemIndex === index} key={index} data-index={index} onClick={metaItemOnClick} />
                                         ))}
                                     </div>
                     }
@@ -208,7 +208,7 @@ const Discover = ({ urlParams, queryParams }) => {
                             inLibrary={selectedMetaItem.inLibrary}
                             toggleInLibrary={selectedMetaItem.inLibrary ? removeFromLibrary : addToLibrary}
                             watched={selectedMetaItem.watched}
-                            toggleWatched={toggleWatched}
+                            toggleWatched={() => toggleWatched(selectedMetaItem)}
                             metaId={selectedMetaItem.id}
                             like={selectedMetaItem.like}
                         />

@@ -196,19 +196,6 @@ const MetaPreview = React.forwardRef(({ className, compact, name, logo, backgrou
             </div>
             <div className={styles['action-buttons-container']}>
                 {
-                    typeof toggleInLibrary === 'function' ?
-                        <ActionButton
-                            className={styles['action-button']}
-                            icon={inLibrary ? 'remove-from-library' : 'add-to-library'}
-                            label={inLibrary ? t('REMOVE_FROM_LIB') : t('ADD_TO_LIB')}
-                            tooltip={compact}
-                            tabIndex={compact ? -1 : 0}
-                            onClick={toggleInLibrary}
-                        />
-                        :
-                        null
-                }
-                {
                     typeof trailerHref === 'string' ?
                         <ActionButton
                             className={styles['action-button']}
@@ -217,6 +204,19 @@ const MetaPreview = React.forwardRef(({ className, compact, name, logo, backgrou
                             tabIndex={compact ? -1 : 0}
                             href={trailerHref}
                             tooltip={compact}
+                        />
+                        :
+                        null
+                }
+                {
+                    typeof toggleInLibrary === 'function' ?
+                        <ActionButton
+                            className={styles['action-button']}
+                            icon={inLibrary ? 'remove-from-library' : 'add-to-library'}
+                            label={inLibrary ? t('REMOVE_FROM_LIB') : t('ADD_TO_LIB')}
+                            tooltip={compact}
+                            tabIndex={compact ? -1 : 0}
+                            onClick={toggleInLibrary}
                         />
                         :
                         null
