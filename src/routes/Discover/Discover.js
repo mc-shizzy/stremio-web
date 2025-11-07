@@ -7,7 +7,7 @@ const classnames = require('classnames');
 const { default: Icon } = require('@stremio/stremio-icons/react');
 const { useServices } = require('stremio/services');
 const { CONSTANTS, useBinaryState, useOnScrollToBottom, withCoreSuspender } = require('stremio/common');
-const { AddonDetailsModal, Button, DelayedRenderer, Image, MainNavBars, DiscItem, MetaPreview, ModalDialog, MultiselectMenu } = require('stremio/components');
+const { AddonDetailsModal, Button, DelayedRenderer, Image, MainNavBars, MetaItem, MetaPreview, ModalDialog, MultiselectMenu } = require('stremio/components');
 const useDiscover = require('./useDiscover');
 const useSelectableInputs = require('./useSelectableInputs');
 const styles = require('./styles');
@@ -183,8 +183,20 @@ const Discover = ({ urlParams, queryParams }) => {
                                     </div>
                                     :
                                     <div ref={metasContainerRef} className={classnames(styles['meta-items-container'], 'animation-fade-in')} onScroll={onScroll} onFocusCapture={metaItemsOnFocusCapture}>
-                                        {discover.catalog.content.content.map((discItem, index) => (
-                                            <DiscItem {...discItem} toggleWatched={() => toggleWatched(discItem)} selected={selectedMetaItemIndex === index} key={index} data-index={index} onClick={metaItemOnClick} />
+                                        {discover.catalog.content.content.map((metaItem, index) => (
+                                            <MetaItem
+                                                key={index}
+                                                className={classnames({ 'selected': selectedMetaItemIndex === index })}
+                                                type={metaItem.type}
+                                                name={metaItem.name}
+                                                poster={metaItem.poster}
+                                                posterShape={metaItem.posterShape}
+                                                playname={selectedMetaItemIndex === index}
+                                                deepLinks={metaItem.deepLinks}
+                                                watched={metaItem.watched}
+                                                data-index={index}
+                                                onClick={metaItemOnClick}
+                                            />
                                         ))}
                                     </div>
                     }

@@ -102,10 +102,12 @@ const MetaPreview = React.forwardRef(({ className, compact, name, logo, backgrou
     const libAndWatchedGroup = React.useMemo(() => [
         {
             icon: inLibrary ? 'remove-from-library' : 'add-to-library',
+            label: inLibrary ? t('REMOVE_FROM_LIB') : t('ADD_TO_LIB'),
             onClick: typeof toggleInLibrary === 'function' ? toggleInLibrary : null,
         },
         {
             icon: watched ? 'eye-off' : 'eye',
+            label: watched ? t('CTX_MARK_UNWATCHED') : t('CTX_MARK_WATCHED'),
             onClick: typeof toggleWatched === 'function' ? toggleWatched : undefined,
         },
     ], [inLibrary, watched, toggleInLibrary, toggleWatched]);
@@ -221,7 +223,7 @@ const MetaPreview = React.forwardRef(({ className, compact, name, logo, backgrou
                 }
                 {
                     typeof toggleInLibrary === 'function' && typeof toggleWatched === 'function'
-                        ? <IconsGroup items={libAndWatchedGroup} />
+                        ? <IconsGroup items={libAndWatchedGroup} className={styles['group-container']} />
                         : null
                 }
                 {
@@ -238,7 +240,7 @@ const MetaPreview = React.forwardRef(({ className, compact, name, logo, backgrou
                 }
                 {
                     !compact && ratingInfo !== null
-                        ? <Ratings ratingInfo={ratingInfo} />
+                        ? <Ratings ratingInfo={ratingInfo} className={styles['group-container']} />
                         : null
                 }
                 {
