@@ -99,7 +99,7 @@ const MetaPreview = React.forwardRef(({ className, compact, name, logo, backgrou
     const renderLogoFallback = React.useCallback(() => (
         <div className={styles['logo-placeholder']}>{name}</div>
     ), [name]);
-    const libAndWatchedGroup = React.useMemo(() => [
+    const metaItemActions = React.useMemo(() => [
         {
             icon: inLibrary ? 'remove-from-library' : 'add-to-library',
             label: inLibrary ? t('REMOVE_FROM_LIB') : t('ADD_TO_LIB'),
@@ -223,7 +223,7 @@ const MetaPreview = React.forwardRef(({ className, compact, name, logo, backgrou
                 }
                 {
                     typeof toggleInLibrary === 'function' && typeof toggleWatched === 'function'
-                        ? <IconsGroup items={libAndWatchedGroup} className={styles['group-container']} />
+                        ? <IconsGroup items={metaItemActions} className={styles['group-container']} />
                         : null
                 }
                 {
@@ -239,9 +239,13 @@ const MetaPreview = React.forwardRef(({ className, compact, name, logo, backgrou
                         null
                 }
                 {
-                    !compact && ratingInfo !== null
-                        ? <Ratings ratingInfo={ratingInfo} className={styles['group-container']} />
-                        : null
+                    !compact && ratingInfo !== null ?
+                        <Ratings
+                            ratingInfo={ratingInfo}
+                            className={styles['ratings']}
+                        />
+                        :
+                        null
                 }
                 {
                     linksGroups.has(CONSTANTS.SHARE_LINK_CATEGORY) && !compact ?

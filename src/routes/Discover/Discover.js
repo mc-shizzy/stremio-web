@@ -74,17 +74,17 @@ const Discover = ({ urlParams, queryParams }) => {
             }
         });
     }, [selectedMetaItem]);
-    const toggleWatched = React.useCallback((item) => {
-        if (item === null) {
+    const toggleWatched = React.useCallback(() => {
+        if (selectedMetaItem === null) {
             return;
         }
 
-        if (!item.inLibrary) {
+        if (!selectedMetaItem.inLibrary) {
             core.transport.dispatch({
                 action: 'Ctx',
                 args: {
                     action: 'AddToLibrary',
-                    args: item
+                    args: selectedMetaItem
                 }
             });
         }
@@ -94,12 +94,12 @@ const Discover = ({ urlParams, queryParams }) => {
             args: {
                 action: 'LibraryItemMarkAsWatched',
                 args: {
-                    id: item.id,
-                    is_watched: !item.watched
+                    id: selectedMetaItem.id,
+                    is_watched: !selectedMetaItem.watched
                 }
             }
         });
-    }, []);
+    }, [selectedMetaItem]);
     const metaItemsOnFocusCapture = React.useCallback((event) => {
         if (event.target.dataset.index !== null && !isNaN(event.target.dataset.index)) {
             setSelectedMetaItemIndex(parseInt(event.target.dataset.index, 10));
@@ -220,7 +220,7 @@ const Discover = ({ urlParams, queryParams }) => {
                             inLibrary={selectedMetaItem.inLibrary}
                             toggleInLibrary={selectedMetaItem.inLibrary ? removeFromLibrary : addToLibrary}
                             watched={selectedMetaItem.watched}
-                            toggleWatched={() => toggleWatched(selectedMetaItem)}
+                            toggleWatched={toggleWatched}
                             metaId={selectedMetaItem.id}
                             like={selectedMetaItem.like}
                         />
