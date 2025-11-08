@@ -6,7 +6,7 @@ import Icon from '@stremio/stremio-icons/react';
 import styles from './IconsGroup.less';
 import { Tooltip } from 'stremio/common/Tooltips';
 
-type GroupItem = {
+type Item = {
     icon: string;
     label?: string;
     filled?: string;
@@ -16,7 +16,7 @@ type GroupItem = {
 };
 
 type Props = {
-    items: GroupItem[];
+    items: Item[];
     className?: string;
 };
 
