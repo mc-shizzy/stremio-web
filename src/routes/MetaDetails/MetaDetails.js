@@ -69,16 +69,6 @@ const MetaDetails = ({ urlParams, queryParams }) => {
             return;
         }
 
-        if (!metaDetails.metaItem.content.content.inLibrary) {
-            core.transport.dispatch({
-                action: 'Ctx',
-                args: {
-                    action: 'AddToLibrary',
-                    args: metaDetails.metaItem.content.content
-                }
-            });
-        }
-
         core.transport.dispatch({
             action: 'Ctx',
             args: {

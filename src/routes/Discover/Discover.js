@@ -79,16 +79,6 @@ const Discover = ({ urlParams, queryParams }) => {
             return;
         }
 
-        if (!selectedMetaItem.inLibrary) {
-            core.transport.dispatch({
-                action: 'Ctx',
-                args: {
-                    action: 'AddToLibrary',
-                    args: selectedMetaItem
-                }
-            });
-        }
-
         core.transport.dispatch({
             action: 'Ctx',
             args: {
