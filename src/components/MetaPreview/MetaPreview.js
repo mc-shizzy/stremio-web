@@ -8,7 +8,7 @@ const { useTranslation } = require('react-i18next');
 const { default: Icon } = require('@stremio/stremio-icons/react');
 const { default: Button } = require('stremio/components/Button');
 const { default: Image } = require('stremio/components/Image');
-const { IconsGroup } = require('stremio/components/IconsGroup');
+const { ActionsGroup } = require('stremio/components/ActionsGroup');
 const ModalDialog = require('stremio/components/ModalDialog');
 const SharePrompt = require('stremio/components/SharePrompt');
 const CONSTANTS = require('stremio/common/CONSTANTS');
@@ -223,7 +223,7 @@ const MetaPreview = React.forwardRef(({ className, compact, name, logo, backgrou
                 }
                 {
                     typeof toggleInLibrary === 'function' && typeof toggleWatched === 'function'
-                        ? <IconsGroup items={metaItemActions} className={styles['group-container']} />
+                        ? <ActionsGroup items={metaItemActions} className={styles['group-container']} />
                         : null
                 }
                 {
@@ -242,7 +242,7 @@ const MetaPreview = React.forwardRef(({ className, compact, name, logo, backgrou
                     !compact && ratingInfo !== null ?
                         <Ratings
                             ratingInfo={ratingInfo}
-                            className={styles['ratings']}
+                            className={styles['group-container']}
                         />
                         :
                         null

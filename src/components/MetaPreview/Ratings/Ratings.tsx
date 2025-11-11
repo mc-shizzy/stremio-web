@@ -2,7 +2,7 @@
 
 import React, { useMemo } from 'react';
 import useRating from './useRating';
-import { IconsGroup } from 'stremio/components/IconsGroup';
+import { ActionsGroup } from 'stremio/components/ActionsGroup';
 
 type Props = {
     metaId?: string;
@@ -26,7 +26,7 @@ const Ratings = ({ ratingInfo, className }: Props) => {
         },
     ], [liked, loved, disabled, onLiked, onLoved]);
 
-    return <IconsGroup items={items} className={className} />;
+    return <ActionsGroup items={items} className={className} />;
 };
 
 export default Ratings;

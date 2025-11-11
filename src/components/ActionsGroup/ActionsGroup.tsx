@@ -3,7 +3,7 @@
 import classNames from 'classnames';
 import React from 'react';
 import Icon from '@stremio/stremio-icons/react';
-import styles from './IconsGroup.less';
+import styles from './ActionsGroup.less';
 import { Tooltip } from 'stremio/common/Tooltips';
 
 type Item = {
@@ -20,7 +20,7 @@ type Props = {
     className?: string;
 };
 
-const IconsGroup = ({ items, className }: Props) => {
+const ActionsGroup = ({ items, className }: Props) => {
     return (
         <div className={classNames(styles['group-container'], className)}>
             {items.map((item, index) => (
@@ -36,4 +36,4 @@ const IconsGroup = ({ items, className }: Props) => {
     );
 };
 
-export default IconsGroup;
+export default ActionsGroup;
