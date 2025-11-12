@@ -65,18 +65,15 @@ const MetaDetails = ({ urlParams, queryParams }) => {
         });
     }, [metaDetails]);
     const toggleWatched = React.useCallback(() => {
-        if (metaDetails.metaItem.content.content === null || metaDetails.metaItem.content.type !== 'Ready') {
+        if (metaDetails.metaItem === null || metaDetails.metaItem.content.type !== 'Ready') {
             return;
         }
 
         core.transport.dispatch({
-            action: 'Ctx',
+            action: 'MetaDetails',
             args: {
-                action: 'LibraryItemMarkAsWatched',
-                args: {
-                    id: metaDetails.metaItem.content.content.id,
-                    is_watched: !metaDetails.metaItem.content.content.watched
-                }
+                action: 'MarkAsWatched',
+                args: !metaDetails.metaItem.watched
             }
         });
     }, [metaDetails]);
