@@ -73,7 +73,7 @@ const MetaDetails = ({ urlParams, queryParams }) => {
             action: 'MetaDetails',
             args: {
                 action: 'MarkAsWatched',
-                args: !metaDetails.metaItem.watched
+                args: !metaDetails.metaItem.content.content.watched
             }
         });
     }, [metaDetails]);

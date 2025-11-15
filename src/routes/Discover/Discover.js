@@ -79,24 +79,11 @@ const Discover = ({ urlParams, queryParams }) => {
             return;
         }
 
-        if (!selectedMetaItem.inLibrary) {
-            core.transport.dispatch({
-                action: 'Ctx',
-                args: {
-                    action: 'AddToLibrary',
-                    args: selectedMetaItem
-                }
-            });
-        }
-
         core.transport.dispatch({
-            action: 'Ctx',
+            action: 'MetaDetails',
             args: {
-                action: 'LibraryItemMarkAsWatched',
-                args: {
-                    id: selectedMetaItem.id,
-                    is_watched: !selectedMetaItem.watched
-                }
+                action: 'MarkAsWatched',
+                args: !selectedMetaItem.watched
             }
         });
     }, [selectedMetaItem]);
