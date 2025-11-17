@@ -41,12 +41,31 @@ const Discover = ({ urlParams, queryParams }) => {
         }
     }, [hasNextPage, loadNextPage]);
     const selectedMetaItem = React.useMemo(() => {
-        return discover.catalog !== null &&
+        const item = discover.catalog !== null &&
             discover.catalog.content.type === 'Ready' &&
             discover.catalog.content.content[selectedMetaItemIndex] ?
             discover.catalog.content.content[selectedMetaItemIndex]
             :
             null;
+
+        if (item !== null) {
+            core.transport.dispatch({
+                action: 'Load',
+                args: {
+                    model: 'MetaDetails',
+                    args: {
+                        metaPath: {
+                            resource: 'meta',
+                            type: item.type,
+                            id: item.id,
+                            extra: []
+                        }
+                    }
+                }
+            });
+        }
+
+        return item;
     }, [discover.catalog, selectedMetaItemIndex]);
     const addToLibrary = React.useCallback(() => {
         if (selectedMetaItem === null) {
