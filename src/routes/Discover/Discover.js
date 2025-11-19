@@ -10,6 +10,7 @@ const { CONSTANTS, useBinaryState, useOnScrollToBottom, withCoreSuspender } = re
 const { AddonDetailsModal, Button, DelayedRenderer, Image, MainNavBars, MetaItem, MetaPreview, ModalDialog, MultiselectMenu } = require('stremio/components');
 const useDiscover = require('./useDiscover');
 const useSelectableInputs = require('./useSelectableInputs');
+const useMetaDetails = require('../MetaDetails/useMetaDetails');
 const styles = require('./styles');
 
 const SCROLL_TO_BOTTOM_THRESHOLD = 400;
@@ -22,6 +23,18 @@ const Discover = ({ urlParams, queryParams }) => {
     const [inputsModalOpen, openInputsModal, closeInputsModal] = useBinaryState(false);
     const [addonModalOpen, openAddonModal, closeAddonModal] = useBinaryState(false);
     const [selectedMetaItemIndex, setSelectedMetaItemIndex] = React.useState(0);
+
+    const { selectedMetaItem, metaDetailsParams } = React.useMemo(() => {
+        const item = discover.catalog?.content.type === 'Ready' &&
+                    discover.catalog.content.content[selectedMetaItemIndex] || null;
+
+        return {
+            selectedMetaItem: item,
+            metaDetailsParams: item ? { type: item.type, id: item.id } : {}
+        };
+    }, [discover.catalog, selectedMetaItemIndex]);
+
+    useMetaDetails(metaDetailsParams);
 
     const metasContainerRef = React.useRef();
     const metaPreviewRef = React.useRef();
@@ -40,33 +53,6 @@ const Discover = ({ urlParams, queryParams }) => {
             }
         }
     }, [hasNextPage, loadNextPage]);
-    const selectedMetaItem = React.useMemo(() => {
-        const item = discover.catalog !== null &&
-            discover.catalog.content.type === 'Ready' &&
-            discover.catalog.content.content[selectedMetaItemIndex] ?
-            discover.catalog.content.content[selectedMetaItemIndex]
-            :
-            null;
-
-        if (item !== null) {
-            core.transport.dispatch({
-                action: 'Load',
-                args: {
-                    model: 'MetaDetails',
-                    args: {
-                        metaPath: {
-                            resource: 'meta',
-                            type: item.type,
-                            id: item.id,
-                            extra: []
-                        }
-                    }
-                }
-            });
-        }
-
-        return item;
-    }, [discover.catalog, selectedMetaItemIndex]);
     const addToLibrary = React.useCallback(() => {
         if (selectedMetaItem === null) {
             return;
