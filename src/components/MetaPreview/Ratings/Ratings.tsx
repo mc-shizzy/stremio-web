@@ -2,7 +2,7 @@
 
 import React, { useMemo } from 'react';
 import useRating from './useRating';
-import { ActionsGroup } from 'stremio/components/ActionsGroup';
+import { ActionsGroup } from 'stremio/components';
 
 type Props = {
     metaId?: string;
@@ -13,6 +13,7 @@ type Props = {
 const Ratings = ({ ratingInfo, className }: Props) => {
     const { onLiked, onLoved, liked, loved } = useRating(ratingInfo);
     const disabled = useMemo(() => ratingInfo?.type !== 'Ready', [ratingInfo]);
+
     const items = useMemo(() => [
         {
             icon: liked ? 'thumbs-up' : 'thumbs-up-outline',
@@ -24,9 +25,11 @@ const Ratings = ({ ratingInfo, className }: Props) => {
             disabled,
             onClick: onLoved,
         },
-    ], [liked, loved, disabled, onLiked, onLoved]);
+    ], [liked, loved, disabled]);
 
-    return <ActionsGroup items={items} className={className} />;
+    return (
+        <ActionsGroup items={items} className={className} />
+    );
 };
 
 export default Ratings;
