@@ -50,7 +50,7 @@ const mapSelectableInputs = (installedAddons, remoteAddons, t) => {
                 remoteAddons.selected !== null ?
                     t.stringWithPrefix(remoteAddons.selected.request.path.type, 'TYPE_')
                     :
-                    typeSelect.title;
+                    t.string('SELECT_TYPE');
         },
         onSelect: (value) => {
             window.location = value;

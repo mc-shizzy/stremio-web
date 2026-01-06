@@ -4,7 +4,7 @@ import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from '
 import classnames from 'classnames';
 import throttle from 'lodash.throttle';
 import { useRouteFocused } from 'stremio-router';
-import { useProfile, useStreamingServer, withCoreSuspender } from 'stremio/common';
+import { usePlatform, useProfile, useStreamingServer, withCoreSuspender } from 'stremio/common';
 import { MainNavBars } from 'stremio/components';
 import { SECTIONS } from './constants';
 import Menu from './Menu';
@@ -18,6 +18,7 @@ import styles from './Settings.less';
 const Settings = () => {
     const { routeFocused } = useRouteFocused();
     const profile = useProfile();
+    const platform = usePlatform();
     const streamingServer = useStreamingServer();
 
     const sectionsContainerRef = useRef<HTMLDivElement>(null);
@@ -37,14 +38,10 @@ const Settings = () => {
 
     const updateSelectedSectionId = useCallback(() => {
         const container = sectionsContainerRef.current;
-        if (container!.scrollTop + container!.clientHeight >= container!.scrollHeight - 50) {
-            setSelectedSectionId(sections[sections.length - 1].id);
-        } else {
-            for (let i = sections.length - 1; i >= 0; i--) {
-                if (sections[i].ref.current!.offsetTop - container!.offsetTop <= container!.scrollTop) {
-                    setSelectedSectionId(sections[i].id);
-                    break;
-                }
+        for (const section of sections) {
+            const sectionContainer = section.ref.current;
+            if (sectionContainer && (sectionContainer.offsetTop + container!.offsetTop) < container!.scrollTop + 50) {
+                setSelectedSectionId(section.id);
             }
         }
     }, []);
@@ -94,7 +91,9 @@ const Settings = () => {
                         profile={profile}
                         streamingServer={streamingServer}
                     />
-                    <Shortcuts ref={shortcutsSectionRef} />
+                    {
+                        !platform.isMobile && <Shortcuts ref={shortcutsSectionRef} />
+                    }
                     <Info streamingServer={streamingServer} />
                 </div>
             </div>
