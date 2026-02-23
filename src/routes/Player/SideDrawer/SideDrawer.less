@@ -87,9 +87,11 @@
 @media @phone-portrait {
     .side-drawer {
         max-width: 100dvw;
+        padding-top: calc(@padding + var(--safe-area-inset-top));
 
         .close-button {
             display: block;
+            top: calc(1.3rem + var(--safe-area-inset-top));
         }
     }
 }
