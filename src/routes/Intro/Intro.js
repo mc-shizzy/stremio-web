@@ -183,7 +183,7 @@ const Intro = ({ queryParams }) => {
             return;
         }
         if (!state.privacyPolicyAccepted) {
-            dispatch({ type: 'error', error: 'You must accept the Privacy Policy' });
+            dispatch({ type: 'error', error: t('MUST_ACCEPT_PRIVACY_POLICY') });
             return;
         }
         openLoaderModal();

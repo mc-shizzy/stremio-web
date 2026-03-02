@@ -75,6 +75,11 @@
                 "combos": [["G"], ["H"]]
             },
             {
+                "name": "toggleSubtitles",
+                "label": "SETTINGS_SHORTCUT_TOGGLE_SUBTITLES",
+                "combos": [["C"]]
+            },
+            {
                 "name": "subtitlesMenu",
                 "label": "SETTINGS_SHORTCUT_MENU_SUBTITLES",
                 "combos": [["S"]]

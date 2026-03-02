@@ -90,6 +90,7 @@ const Player = ({ urlParams, queryParams }) => {
 
     const nextVideoPopupDismissed = React.useRef(false);
     const defaultSubtitlesSelected = React.useRef(false);
+    const subtitlesEnabled = React.useRef(true);
     const defaultAudioTrackSelected = React.useRef(false);
     const [error, setError] = React.useState(null);
 
@@ -669,6 +670,19 @@ const Player = ({ urlParams, queryParams }) => {
     onShortcut('subtitlesSize', (combo) => {
         combo === 1 ? onUpdateSubtitlesSize(-1) : onUpdateSubtitlesSize(1);
     }, [onUpdateSubtitlesSize, onUpdateSubtitlesSize]);
+
+    onShortcut('toggleSubtitles', () => {
+        const savedTrack = player.streamState?.subtitleTrack;
+
+        if (subtitlesEnabled.current) {
+            video.setSubtitlesTrack(null);
+            video.setExtraSubtitlesTrack(null);
+        } else if (savedTrack?.id) {
+            savedTrack.embedded ? video.setSubtitlesTrack(savedTrack.id) : video.setExtraSubtitlesTrack(savedTrack.id);
+        }
+
+        subtitlesEnabled.current = !subtitlesEnabled.current;
+    }, [player.streamState]);
 
     onShortcut('subtitlesMenu', () => {
         closeMenus();
