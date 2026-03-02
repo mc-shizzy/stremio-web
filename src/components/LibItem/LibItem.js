@@ -119,11 +119,14 @@ const LibItem = ({ _id, removable, notifications, watched, ...props }) => {
         }
     }, [_id, props.deepLinks, props.optionOnSelect]);
 
-    const onPlayClick = React.useCallback((event) => {
+    const onPlayClick = React.useMemo(() => {
         if (props.deepLinks && typeof props.deepLinks.player === 'string') {
-            event.preventDefault();
-            window.location = props.deepLinks.player;
+            return (event) => {
+                event.preventDefault();
+                window.location = props.deepLinks.player;
+            };
         }
+        return null;
     }, [props.deepLinks]);
 
     return (
@@ -133,7 +136,7 @@ const LibItem = ({ _id, removable, notifications, watched, ...props }) => {
             newVideos={newVideos}
             options={options}
             optionOnSelect={optionOnSelect}
-            onPlayClick={props.deepLinks && typeof props.deepLinks.player === 'string' ? onPlayClick : null}
+            onPlayClick={onPlayClick}
         />
     );
 };
