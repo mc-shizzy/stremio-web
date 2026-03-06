@@ -55,7 +55,7 @@ importers:
         version: 24.2.3(typescript@5.9.2)
       langs:
         specifier: github:Stremio/nodejs-langs
-        version: https://codeload.github.com/Stremio/nodejs-langs/tar.gz/24daad4e78c324fcc88d6673df3cd75348b2efdf
+        version: https://codeload.github.com/Stremio/nodejs-langs/tar.gz/e5a3af7d2dd556592cbfe7cf879c1064ed0081a1
       lodash.debounce:
         specifier: 4.0.8
         version: 4.0.8
@@ -3051,8 +3051,8 @@ packages:
     resolution: {integrity: sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w==}
     engines: {node: '>=6'}
 
-  langs@https://codeload.github.com/Stremio/nodejs-langs/tar.gz/24daad4e78c324fcc88d6673df3cd75348b2efdf:
-    resolution: {tarball: https://codeload.github.com/Stremio/nodejs-langs/tar.gz/24daad4e78c324fcc88d6673df3cd75348b2efdf}
+  langs@https://codeload.github.com/Stremio/nodejs-langs/tar.gz/e5a3af7d2dd556592cbfe7cf879c1064ed0081a1:
+    resolution: {tarball: https://codeload.github.com/Stremio/nodejs-langs/tar.gz/e5a3af7d2dd556592cbfe7cf879c1064ed0081a1}
     version: 2.0.0
 
   launch-editor@2.11.1:
@@ -8295,7 +8295,7 @@ snapshots:
 
   kleur@3.0.3: {}
 
-  langs@https://codeload.github.com/Stremio/nodejs-langs/tar.gz/24daad4e78c324fcc88d6673df3cd75348b2efdf: {}
+  langs@https://codeload.github.com/Stremio/nodejs-langs/tar.gz/e5a3af7d2dd556592cbfe7cf879c1064ed0081a1: {}
 
   launch-editor@2.11.1:
     dependencies:
