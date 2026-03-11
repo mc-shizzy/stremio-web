@@ -725,6 +725,15 @@ const Player = ({ urlParams, queryParams }) => {
         }
     }, [player.selected, streamingServer.statistics, toggleStatisticsMenu]);
 
+    onShortcut('playNext', () => {
+        closeMenus();
+        if (window.playerNextVideo !== null) {
+            nextVideo();
+            const deepLinks = window.playerNextVideo.deepLinks;
+            handleNextVideoNavigation(deepLinks, false, false);
+        }
+    }, []);
+
     onShortcut('exit', () => {
         closeMenus();
         !settings.escExitFullscreen && window.history.back();
