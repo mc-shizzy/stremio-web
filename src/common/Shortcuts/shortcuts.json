@@ -106,7 +106,7 @@
             },
             {
                 "name": "playNext",
-                "label": "SETTINGS_SHORTCUT_MENU_PLAY_NEXT",
+                "label": "SETTINGS_SHORTCUT_PLAY_NEXT",
                 "combos": [["Shift", "N"]]
             }
         ]
