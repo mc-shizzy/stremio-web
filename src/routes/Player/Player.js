@@ -369,7 +369,7 @@ const Player = ({ urlParams, queryParams }) => {
                     subtitles: Array.isArray(player.selected.stream.subtitles) ?
                         player.selected.stream.subtitles.map((subtitles) => ({
                             ...subtitles,
-                            label: subtitles.url
+                            label: subtitles.label || subtitles.url
                         }))
                         :
                         []
@@ -406,7 +406,7 @@ const Player = ({ urlParams, queryParams }) => {
         if (video.state.stream !== null) {
             const tracks = player.subtitles.map((subtitles) => ({
                 ...subtitles,
-                label: subtitles.url
+                label: subtitles.label || subtitles.url
             }));
             video.addExtraSubtitlesTracks(tracks);
         }
