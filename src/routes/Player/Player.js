@@ -96,7 +96,7 @@ const Player = ({ urlParams, queryParams }) => {
 
     const isNavigating = React.useRef(false);
 
-    const playbackSpeed = React.useRef(video.state.playbackSpeed);
+    const playbackSpeed = React.useRef(video.state.playbackSpeed || 1);
     const pressTimer = React.useRef(null);
     const longPress = React.useRef(false);
     const controlBarRef = React.useRef(null);
@@ -231,7 +231,7 @@ const Player = ({ urlParams, queryParams }) => {
 
         playbackSpeed.current = rate;
 
-    }, [video.setPlaybackSpeed]);
+    }, []);
 
     const onSubtitlesTrackSelected = React.useCallback((id) => {
         video.setSubtitlesTrack(id);
