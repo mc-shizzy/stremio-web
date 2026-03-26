@@ -99,6 +99,7 @@ const Player = ({ urlParams, queryParams }) => {
     const playbackSpeed = React.useRef(video.state.playbackSpeed);
     const pressTimer = React.useRef(null);
     const longPress = React.useRef(false);
+    const controlBarRef = React.useRef(null);
 
     const HOLD_DELAY = 200;
 
@@ -783,6 +784,7 @@ const Player = ({ urlParams, queryParams }) => {
 
         const onMouseDownHold = (e) => {
             if (e.button !== 0) return; // left mouse button only
+            if (controlBarRef.current && controlBarRef.current.contains(e.target)) return;
 
             longPress.current = false;
 
@@ -927,6 +929,7 @@ const Player = ({ urlParams, queryParams }) => {
                     null
             }
             <ControlBar
+                ref={controlBarRef}
                 className={classnames(styles['layer'], styles['control-bar-layer'])}
                 paused={video.state.paused}
                 time={video.state.time}
