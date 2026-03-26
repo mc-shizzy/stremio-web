@@ -717,6 +717,18 @@ const Player = ({ urlParams, queryParams }) => {
         }
     }, [video.state.playbackSpeed, toggleSpeedMenu]);
 
+    onShortcut('speedUp', () => {
+        if (video.state.playbackSpeed !== null) {
+            onPlaybackSpeedChanged(Math.min(video.state.playbackSpeed + 0.25, 2));
+        }
+    }, [video.state.playbackSpeed, onPlaybackSpeedChanged]);
+
+    onShortcut('speedDown', () => {
+        if (video.state.playbackSpeed !== null) {
+            onPlaybackSpeedChanged(Math.max(video.state.playbackSpeed - 0.25, 0.25));
+        }
+    }, [video.state.playbackSpeed, onPlaybackSpeedChanged]);
+
     onShortcut('statisticsMenu', () => {
         closeMenus();
         const stream = player.selected?.stream;
