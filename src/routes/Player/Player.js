@@ -96,6 +96,7 @@ const Player = ({ urlParams, queryParams }) => {
 
     const isNavigating = React.useRef(false);
 
+    const playbackSpeed = React.useRef(video.state.playbackSpeed);
     const pressTimer = React.useRef(null);
     const longPress = React.useRef(false);
 
@@ -222,7 +223,10 @@ const Player = ({ urlParams, queryParams }) => {
         seek(time, video.state.duration, video.state.manifest?.name);
     }, [video.state.duration, video.state.manifest]);
 
-    const onPlaybackSpeedChanged = React.useCallback((rate) => {
+    const onPlaybackSpeedChanged = React.useCallback((rate, skipUpdate) => {
+        if (!skipUpdate) {
+            playbackSpeed.current = rate;
+        }
         video.setPlaybackSpeed(rate);
     }, []);
 
@@ -747,7 +751,7 @@ const Player = ({ urlParams, queryParams }) => {
 
             pressTimer.current = setTimeout(() => {
                 longPress.current = true;
-                onPlaybackSpeedChanged(2);
+                onPlaybackSpeedChanged(2, true);
             }, HOLD_DELAY);
         };
 
@@ -761,7 +765,7 @@ const Player = ({ urlParams, queryParams }) => {
             if (e.code === 'Space') {
                 clearTimeout(pressTimer.current);
                 pressTimer.current = null;
-                onPlaybackSpeedChanged(1);
+                onPlaybackSpeedChanged(playbackSpeed.current);
             }
         };
 
