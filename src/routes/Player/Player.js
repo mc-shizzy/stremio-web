@@ -225,11 +225,13 @@ const Player = ({ urlParams, queryParams }) => {
     }, [video.state.duration, video.state.manifest]);
 
     const onPlaybackSpeedChanged = React.useCallback((rate, skipUpdate) => {
-        if (!skipUpdate) {
-            playbackSpeed.current = rate;
-        }
         video.setPlaybackSpeed(rate);
-    }, []);
+
+        if (skipUpdate) return;
+
+        playbackSpeed.current = rate;
+
+    }, [video.setPlaybackSpeed]);
 
     const onSubtitlesTrackSelected = React.useCallback((id) => {
         video.setSubtitlesTrack(id);
@@ -790,7 +792,7 @@ const Player = ({ urlParams, queryParams }) => {
 
             pressTimer.current = setTimeout(() => {
                 longPress.current = true;
-                onPlaybackSpeedChanged(2);
+                onPlaybackSpeedChanged(2, true);
             }, HOLD_DELAY);
         };
 
@@ -800,7 +802,7 @@ const Player = ({ urlParams, queryParams }) => {
             clearTimeout(pressTimer.current);
 
             if (longPress.current) {
-                onPlaybackSpeedChanged(1);
+                onPlaybackSpeedChanged(playbackSpeed.current);
             }
         };
 
