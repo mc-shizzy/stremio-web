@@ -6,6 +6,8 @@ const { useServices } = require('stremio/services');
 const useToast = require('stremio/common/Toast/useToast');
 const useStreamingServer = require('stremio/common/useStreamingServer');
 
+const CREATE_TORRENT_TIMEOUT = 20000;
+
 const useTorrent = () => {
     const { core } = useServices();
     const streamingServer = useStreamingServer();
@@ -25,10 +27,10 @@ const useTorrent = () => {
             createTorrentTimeout.current = setTimeout(() => {
                 toast.show({
                     type: 'error',
-                    title: 'It\'s taking a long time to get metadata from the torrent.',
-                    timeout: 10000
+                    title: 'Failed to get metadata from the torrent. No peers found.',
+                    timeout: 8000
                 });
-            }, 10000);
+            }, CREATE_TORRENT_TIMEOUT);
         }
     }, []);
     React.useEffect(() => {

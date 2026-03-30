@@ -26,6 +26,7 @@ const { default: useSettings } = require('./useSettings');
 const { default: useShell } = require('./useShell');
 const useStreamingServer = require('./useStreamingServer');
 const { default: useTimeout } = require('./useTimeout');
+const { default: usePlayUrl } = require('./usePlayUrl');
 const useTorrent = require('./useTorrent');
 const useTranslate = require('./useTranslate');
 const { default: useOrientation } = require('./useOrientation');
@@ -65,6 +66,7 @@ module.exports = {
     useShell,
     useStreamingServer,
     useTimeout,
+    usePlayUrl,
     useTorrent,
     useTranslate,
     useOrientation,
