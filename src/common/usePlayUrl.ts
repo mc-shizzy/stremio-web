@@ -30,24 +30,20 @@ const usePlayUrl = () => {
             return false;
         }
 
-        try {
-            const parsed = magnet.decode(trimmed);
-            if (parsed && typeof parsed.infoHash === 'string') {
-                const serverReady = streamingServer.settings !== null
-                    && streamingServer.settings.type === 'Ready';
-                if (!serverReady) {
-                    toast.show({
-                        type: 'error',
-                        title: 'Streaming server is not available. Cannot play magnet links.',
-                        timeout: 5000
-                    });
-                    return false;
-                }
-                createTorrentFromMagnet(trimmed);
-                return true;
+        const parsed = magnet.decode(trimmed);
+        if (parsed && typeof parsed.infoHash === 'string') {
+            const serverReady = streamingServer.settings !== null
+                && streamingServer.settings.type === 'Ready';
+            if (!serverReady) {
+                toast.show({
+                    type: 'error',
+                    title: 'Streaming server is not available. Cannot play magnet links.',
+                    timeout: 5000
+                });
+                return false;
             }
-        } catch (e) {
-            // Not a valid magnet
+            createTorrentFromMagnet(trimmed);
+            return true;
         }
 
         return false;
