@@ -18,6 +18,11 @@ const usePlayUrl = () => {
         const trimmed = text.trim();
 
         if (HTTP_REGEX.test(trimmed)) {
+            toast.show({
+                type: 'success',
+                title: 'Loading HTTP stream…',
+                timeout: 3000
+            });
             try {
                 const encoded = await core.transport.encodeStream({ url: trimmed });
                 if (typeof encoded === 'string') {
@@ -27,6 +32,11 @@ const usePlayUrl = () => {
             } catch (e) {
                 console.error('Failed to encode stream:', e);
             }
+            toast.show({
+                type: 'error',
+                title: 'Failed to load HTTP stream.',
+                timeout: 5000
+            });
             return false;
         }
 

@@ -13,9 +13,15 @@ const useTorrent = () => {
     const streamingServer = useStreamingServer();
     const toast = useToast();
     const createTorrentTimeout = React.useRef(null);
+    const parsingToastId = React.useRef(null);
     const createTorrentFromMagnet = React.useCallback((text) => {
         const parsed = magnet.decode(text);
         if (parsed && typeof parsed.infoHash === 'string') {
+            parsingToastId.current = toast.show({
+                type: 'success',
+                title: 'Parsing magnet link…',
+                timeout: CREATE_TORRENT_TIMEOUT
+            });
             core.transport.dispatch({
                 action: 'StreamingServer',
                 args: {
@@ -38,6 +44,7 @@ const useTorrent = () => {
             const [, { type }] = streamingServer.torrent;
             if (type === 'Ready') {
                 clearTimeout(createTorrentTimeout.current);
+                toast.remove(parsingToastId.current);
             }
         }
     }, [streamingServer.torrent]);
