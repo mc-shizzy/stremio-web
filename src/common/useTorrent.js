@@ -31,9 +31,10 @@ const useTorrent = () => {
             });
             clearTimeout(createTorrentTimeout.current);
             createTorrentTimeout.current = setTimeout(() => {
+                toast.remove(parsingToastId.current);
                 toast.show({
                     type: 'error',
-                    title: 'Failed to get metadata from the torrent. No peers found.',
+                    title: 'Failed to parse magnet link.',
                     timeout: 8000
                 });
             }, CREATE_TORRENT_TIMEOUT);
