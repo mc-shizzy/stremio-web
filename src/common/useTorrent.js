@@ -19,7 +19,7 @@ const useTorrent = () => {
         if (parsed && typeof parsed.infoHash === 'string') {
             parsingToastId.current = toast.show({
                 type: 'success',
-                title: 'Parsing magnet link…',
+                title: 'Loading magnet link…',
                 timeout: CREATE_TORRENT_TIMEOUT
             });
             core.transport.dispatch({
