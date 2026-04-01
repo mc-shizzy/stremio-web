@@ -5,7 +5,6 @@ const { PlatformProvider, usePlatform } = require('./Platform');
 const { ToastProvider, useToast } = require('./Toast');
 const { TooltipProvider, Tooltip } = require('./Tooltips');
 const { ShortcutsProvider, useShortcuts, onShortcut } = require('./Shortcuts');
-const comparatorWithPriorities = require('./comparatorWithPriorities');
 const CONSTANTS = require('./CONSTANTS');
 const { withCoreSuspender, useCoreSuspender } = require('./CoreSuspender');
 const getVisibleChildrenRange = require('./getVisibleChildrenRange');
@@ -43,7 +42,6 @@ module.exports = {
     useToast,
     TooltipProvider,
     Tooltip,
-    comparatorWithPriorities,
     CONSTANTS,
     withCoreSuspender,
     useCoreSuspender,

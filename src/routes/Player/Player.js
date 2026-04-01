@@ -1022,6 +1022,8 @@ const Player = ({ urlParams, queryParams }) => {
                 subtitlesMenuOpen ?
                     <SubtitlesMenu
                         className={classnames(styles['layer'], styles['menu-layer'])}
+                        subtitlesLanguage={settings.subtitlesLanguage}
+                        interfaceLanguage={settings.interfaceLanguage}
                         subtitlesTracks={video.state.subtitlesTracks}
                         selectedSubtitlesTrackId={video.state.selectedSubtitlesTrackId}
                         subtitlesOffset={video.state.subtitlesOffset}
