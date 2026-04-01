@@ -179,7 +179,7 @@ const SubtitlesMenu = React.memo((props) => {
                                     <div className={styles['info']}>
                                         <div className={styles['variant-label']}>
                                             {
-                                                languages.label(!track.label.startsWith('http') ? track.label : track.lang)
+                                                (track.label && track.label.length > 0 && !track.label.startsWith('http')) ? track.label : languages.label(track.lang)
                                             }
                                         </div>
                                         <div className={styles['variant-origin']}>
