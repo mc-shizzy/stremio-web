@@ -44,9 +44,10 @@ const Transition = ({ children, when, name, duration }: Props) => {
     }, [when]);
 
     useEffect(() => {
-        requestAnimationFrame(() => {
+        const animationFrame = requestAnimationFrame(() => {
             setActive(!!element);
         });
+        return () => cancelAnimationFrame(animationFrame);
     }, [element]);
 
     useEffect(() => {
