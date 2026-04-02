@@ -30,7 +30,7 @@ const sortByValues = (items, values) => items.sort((a, b) => {
     return left - right;
 });
 
-const SubtitlesMenu = React.memo((props) => {
+const SubtitlesMenu = React.memo(React.forwardRef((props, ref) => {
     const subtitlesTracks = React.useMemo(() => {
         return normalizeTracksLang(Array.isArray(props.subtitlesTracks) ? props.subtitlesTracks : []);
     }, [props.subtitlesTracks]);
@@ -153,7 +153,7 @@ const SubtitlesMenu = React.memo((props) => {
         }
     }, [props.selectedSubtitlesTrackId, props.selectedExtraSubtitlesTrackId, props.subtitlesOffset, props.extraSubtitlesOffset, props.onSubtitlesOffsetChanged, props.onExtraSubtitlesOffsetChanged]);
     return (
-        <div className={classnames(props.className, styles['subtitles-menu-container'])} onMouseDown={onMouseDown}>
+        <div ref={ref} className={classnames(props.className, styles['subtitles-menu-container'])} onMouseDown={onMouseDown}>
             <div className={styles['languages-container']}>
                 <div className={styles['languages-header']}>{ t('PLAYER_SUBTITLES_LANGUAGES') }</div>
                 <div className={styles['languages-list']}>
@@ -255,7 +255,7 @@ const SubtitlesMenu = React.memo((props) => {
             </div>
         </div>
     );
-});
+}));
 
 SubtitlesMenu.displayName = 'MainNavBars';
 

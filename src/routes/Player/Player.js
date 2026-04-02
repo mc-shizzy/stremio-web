@@ -1000,15 +1000,12 @@ const Player = ({ urlParams, queryParams }) => {
                     :
                     null
             }
-            {
-                statisticsMenuOpen ?
-                    <StatisticsMenu
-                        className={classnames(styles['layer'], styles['menu-layer'])}
-                        {...statistics}
-                    />
-                    :
-                    null
-            }
+            <Transition when={statisticsMenuOpen} name={'fade'}>
+                <StatisticsMenu
+                    className={classnames(styles['layer'], styles['menu-layer'])}
+                    {...statistics}
+                />
+            </Transition>
             <Transition when={sideDrawerOpen} name={'slide-left'}>
                 <SideDrawer
                     className={classnames(styles['layer'], styles['side-drawer-layer'])}
@@ -1018,65 +1015,53 @@ const Player = ({ urlParams, queryParams }) => {
                     selected={player.selected?.streamRequest?.path.id}
                 />
             </Transition>
-            {
-                subtitlesMenuOpen ?
-                    <SubtitlesMenu
-                        className={classnames(styles['layer'], styles['menu-layer'])}
-                        subtitlesLanguage={settings.subtitlesLanguage}
-                        interfaceLanguage={settings.interfaceLanguage}
-                        subtitlesTracks={video.state.subtitlesTracks}
-                        selectedSubtitlesTrackId={video.state.selectedSubtitlesTrackId}
-                        subtitlesOffset={video.state.subtitlesOffset}
-                        subtitlesSize={video.state.subtitlesSize}
-                        extraSubtitlesTracks={video.state.extraSubtitlesTracks}
-                        selectedExtraSubtitlesTrackId={video.state.selectedExtraSubtitlesTrackId}
-                        extraSubtitlesOffset={video.state.extraSubtitlesOffset}
-                        extraSubtitlesDelay={video.state.extraSubtitlesDelay}
-                        extraSubtitlesSize={video.state.extraSubtitlesSize}
-                        onSubtitlesTrackSelected={onSubtitlesTrackSelected}
-                        onExtraSubtitlesTrackSelected={onExtraSubtitlesTrackSelected}
-                        onSubtitlesOffsetChanged={onSubtitlesOffsetChanged}
-                        onSubtitlesSizeChanged={onSubtitlesSizeChanged}
-                        onExtraSubtitlesOffsetChanged={onSubtitlesOffsetChanged}
-                        onExtraSubtitlesDelayChanged={onExtraSubtitlesDelayChanged}
-                        onExtraSubtitlesSizeChanged={onSubtitlesSizeChanged}
-                    />
-                    :
-                    null
-            }
-            {
-                audioMenuOpen ?
-                    <AudioMenu
-                        className={classnames(styles['layer'], styles['menu-layer'])}
-                        audioTracks={video.state.audioTracks}
-                        selectedAudioTrackId={video.state.selectedAudioTrackId}
-                        onAudioTrackSelected={onAudioTrackSelected}
-                    />
-                    :
-                    null
-            }
-            {
-                speedMenuOpen ?
-                    <SpeedMenu
-                        className={classnames(styles['layer'], styles['menu-layer'])}
-                        playbackSpeed={video.state.playbackSpeed}
-                        onPlaybackSpeedChanged={onPlaybackSpeedChanged}
-                    />
-                    :
-                    null
-            }
-            {
-                optionsMenuOpen ?
-                    <OptionsMenu
-                        className={classnames(styles['layer'], styles['menu-layer'])}
-                        stream={player.selected.stream}
-                        playbackDevices={playbackDevices}
-                        extraSubtitlesTracks={video.state.extraSubtitlesTracks}
-                        selectedExtraSubtitlesTrackId={video.state.selectedExtraSubtitlesTrackId}
-                    />
-                    :
-                    null
-            }
+            <Transition when={subtitlesMenuOpen} name={'fade'}>
+                <SubtitlesMenu
+                    className={classnames(styles['layer'], styles['menu-layer'])}
+                    subtitlesLanguage={settings.subtitlesLanguage}
+                    interfaceLanguage={settings.interfaceLanguage}
+                    subtitlesTracks={video.state.subtitlesTracks}
+                    selectedSubtitlesTrackId={video.state.selectedSubtitlesTrackId}
+                    subtitlesOffset={video.state.subtitlesOffset}
+                    subtitlesSize={video.state.subtitlesSize}
+                    extraSubtitlesTracks={video.state.extraSubtitlesTracks}
+                    selectedExtraSubtitlesTrackId={video.state.selectedExtraSubtitlesTrackId}
+                    extraSubtitlesOffset={video.state.extraSubtitlesOffset}
+                    extraSubtitlesDelay={video.state.extraSubtitlesDelay}
+                    extraSubtitlesSize={video.state.extraSubtitlesSize}
+                    onSubtitlesTrackSelected={onSubtitlesTrackSelected}
+                    onExtraSubtitlesTrackSelected={onExtraSubtitlesTrackSelected}
+                    onSubtitlesOffsetChanged={onSubtitlesOffsetChanged}
+                    onSubtitlesSizeChanged={onSubtitlesSizeChanged}
+                    onExtraSubtitlesOffsetChanged={onSubtitlesOffsetChanged}
+                    onExtraSubtitlesDelayChanged={onExtraSubtitlesDelayChanged}
+                    onExtraSubtitlesSizeChanged={onSubtitlesSizeChanged}
+                />
+            </Transition>
+            <Transition when={audioMenuOpen} name={'fade'}>
+                <AudioMenu
+                    className={classnames(styles['layer'], styles['menu-layer'])}
+                    audioTracks={video.state.audioTracks}
+                    selectedAudioTrackId={video.state.selectedAudioTrackId}
+                    onAudioTrackSelected={onAudioTrackSelected}
+                />
+            </Transition>
+            <Transition when={speedMenuOpen} name={'fade'}>
+                <SpeedMenu
+                    className={classnames(styles['layer'], styles['menu-layer'])}
+                    playbackSpeed={video.state.playbackSpeed}
+                    onPlaybackSpeedChanged={onPlaybackSpeedChanged}
+                />
+            </Transition>
+            <Transition when={optionsMenuOpen} name={'fade'}>
+                <OptionsMenu
+                    className={classnames(styles['layer'], styles['menu-layer'])}
+                    stream={player.selected?.stream}
+                    playbackDevices={playbackDevices}
+                    extraSubtitlesTracks={video.state.extraSubtitlesTracks}
+                    selectedExtraSubtitlesTrackId={video.state.selectedExtraSubtitlesTrackId}
+                />
+            </Transition>
         </div>
     );
 };

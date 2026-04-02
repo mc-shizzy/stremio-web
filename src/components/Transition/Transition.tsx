@@ -5,9 +5,10 @@ type Props = {
     children: JSX.Element,
     when: boolean,
     name: string,
+    duration?: number,
 };
 
-const Transition = ({ children, when, name }: Props) => {
+const Transition = ({ children, when, name, duration }: Props) => {
     const [element, setElement] = useState<HTMLElement | null>(null);
     const [mounted, setMounted] = useState(false);
 
@@ -28,6 +29,10 @@ const Transition = ({ children, when, name }: Props) => {
             activeClass,
         );
     }, [name, state, active, children]);
+
+    const style = useMemo(() => {
+        if (duration) return { transitionDuration: `${duration}ms` };
+    }, [duration]);
 
     const onTransitionEnd = useCallback(() => {
         state === 'exit' && setMounted(false);
@@ -53,6 +58,7 @@ const Transition = ({ children, when, name }: Props) => {
         mounted && cloneElement(children, {
             ref: callbackRef,
             className,
+            style,
         })
     );
 };

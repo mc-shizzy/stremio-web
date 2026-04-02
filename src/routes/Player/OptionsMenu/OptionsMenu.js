@@ -9,7 +9,7 @@ const { useServices } = require('stremio/services');
 const Option = require('./Option');
 const styles = require('./styles');
 
-const OptionsMenu = ({ className, stream, playbackDevices, extraSubtitlesTracks, selectedExtraSubtitlesTrackId }) => {
+const OptionsMenu = React.forwardRef(({ className, stream, playbackDevices, extraSubtitlesTracks, selectedExtraSubtitlesTrackId }, ref) => {
     const { t } = useTranslation();
     const { core } = useServices();
     const platform = usePlatform();
@@ -108,7 +108,7 @@ const OptionsMenu = ({ className, stream, playbackDevices, extraSubtitlesTracks,
     }, []);
 
     return (
-        <div className={classnames(className, styles['options-menu-container'])} onMouseDown={onMouseDown}>
+        <div ref={ref} className={classnames(className, styles['options-menu-container'])} onMouseDown={onMouseDown}>
             {
                 streamingUrl || downloadUrl ?
                     <Option
@@ -167,7 +167,7 @@ const OptionsMenu = ({ className, stream, playbackDevices, extraSubtitlesTracks,
             }
         </div>
     );
-};
+});
 
 OptionsMenu.propTypes = {
     className: PropTypes.string,
