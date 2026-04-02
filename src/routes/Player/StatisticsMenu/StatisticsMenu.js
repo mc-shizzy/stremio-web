@@ -6,7 +6,7 @@ const classNames = require('classnames');
 const PropTypes = require('prop-types');
 const styles = require('./styles.less');
 
-const StatisticsMenu = React.forwardRef(({ className, peers, speed, completed, infoHash }, ref) => {
+const StatisticsMenu = React.memo(React.forwardRef(({ className, peers, speed, completed, infoHash }, ref) => {
     const { t } = useTranslation();
     return (
         <div ref={ref} className={classNames(className, styles['statistics-menu-container'])}>
@@ -49,7 +49,7 @@ const StatisticsMenu = React.forwardRef(({ className, peers, speed, completed, i
             </div>
         </div>
     );
-});
+}));
 
 StatisticsMenu.propTypes = {
     className: PropTypes.string,

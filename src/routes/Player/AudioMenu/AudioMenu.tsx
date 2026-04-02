@@ -1,4 +1,4 @@
-import React, { forwardRef, MouseEvent, useCallback } from 'react';
+import React, { forwardRef, memo, MouseEvent, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
 import { languages } from 'stremio/common';
@@ -12,7 +12,7 @@ type Props = {
     onAudioTrackSelected: (id: string) => void,
 };
 
-const AudioMenu = forwardRef<HTMLDivElement, Props>(({ className, selectedAudioTrackId, audioTracks, onAudioTrackSelected }: Props, ref) => {
+const AudioMenu = memo(forwardRef<HTMLDivElement, Props>(({ className, selectedAudioTrackId, audioTracks, onAudioTrackSelected }: Props, ref) => {
     const { t } = useTranslation();
 
     const onAudioTrackClick = useCallback(({ currentTarget }: MouseEvent) => {
@@ -62,6 +62,6 @@ const AudioMenu = forwardRef<HTMLDivElement, Props>(({ className, selectedAudioT
             </div>
         </div>
     );
-});
+}));
 
 export default AudioMenu;
