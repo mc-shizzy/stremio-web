@@ -72,8 +72,8 @@ const Player = ({ urlParams, queryParams }) => {
     const [sideDrawerOpen, , closeSideDrawer, toggleSideDrawer] = useBinaryState(false);
 
     const menusOpen = React.useMemo(() => {
-        return optionsMenuOpen || subtitlesMenuOpen || audioMenuOpen || speedMenuOpen || statisticsMenuOpen || sideDrawerOpen;
-    }, [optionsMenuOpen, subtitlesMenuOpen, audioMenuOpen, speedMenuOpen, statisticsMenuOpen, sideDrawerOpen]);
+        return optionsMenuOpen || subtitlesMenuOpen || audioMenuOpen || speedMenuOpen || statisticsMenuOpen || sideDrawerOpen || nextVideoPopupOpen;
+    }, [optionsMenuOpen, subtitlesMenuOpen, audioMenuOpen, speedMenuOpen, statisticsMenuOpen, sideDrawerOpen, nextVideoPopupOpen]);
 
     const closeMenus = React.useCallback(() => {
         closeOptionsMenu();
@@ -85,8 +85,8 @@ const Player = ({ urlParams, queryParams }) => {
     }, []);
 
     const overlayHidden = React.useMemo(() => {
-        return immersed && !casting && video.state.paused !== null && !video.state.paused && !menusOpen && !nextVideoPopupOpen;
-    }, [immersed, casting, video.state.paused, menusOpen, nextVideoPopupOpen]);
+        return immersed && !casting && video.state.paused !== null && !video.state.paused && !menusOpen;
+    }, [immersed, casting, video.state.paused, menusOpen]);
 
     const nextVideoPopupDismissed = React.useRef(false);
     const defaultSubtitlesSelected = React.useRef(false);
@@ -639,7 +639,7 @@ const Player = ({ urlParams, queryParams }) => {
     }, [player.nextVideo, onPlayRequested, onPauseRequested, onNextVideoRequested]);
 
     onShortcut('playPause', () => {
-        if (!menusOpen && !nextVideoPopupOpen && video.state.paused !== null) {
+        if (video.state.paused !== null) {
             if (video.state.paused) {
                 onPlayRequested();
                 setSeeking(false);
@@ -647,39 +647,39 @@ const Player = ({ urlParams, queryParams }) => {
                 onPauseRequested();
             }
         }
-    }, [menusOpen, nextVideoPopupOpen, video.state.paused, pressTimer.current, onPlayRequested, onPauseRequested]);
+    }, [video.state.paused, pressTimer.current, onPlayRequested, onPauseRequested], !menusOpen);
 
     onShortcut('seekForward', (combo) => {
-        if (!menusOpen && !nextVideoPopupOpen && video.state.time !== null) {
+        if (video.state.time !== null) {
             const seekDuration = combo === 1 ? settings.seekShortTimeDuration : settings.seekTimeDuration;
             setSeeking(true);
             onSeekRequested(video.state.time + seekDuration);
         }
-    }, [menusOpen, nextVideoPopupOpen, video.state.time, onSeekRequested]);
+    }, [video.state.time, onSeekRequested], !menusOpen);
 
     onShortcut('seekBackward', (combo) => {
-        if (!menusOpen && !nextVideoPopupOpen && video.state.time !== null) {
+        if (video.state.time !== null) {
             const seekDuration = combo === 1 ? settings.seekShortTimeDuration : settings.seekTimeDuration;
             setSeeking(true);
             onSeekRequested(video.state.time - seekDuration);
         }
-    }, [menusOpen, nextVideoPopupOpen, video.state.time, onSeekRequested]);
+    }, [video.state.time, onSeekRequested], !menusOpen);
 
     onShortcut('mute', () => {
         video.state.muted === true ? onUnmuteRequested() : onMuteRequested();
     }, [video.state.muted]);
 
     onShortcut('volumeUp', () => {
-        if (!menusOpen && !nextVideoPopupOpen && video.state.volume !== null) {
+        if (video.state.volume !== null) {
             onVolumeChangeRequested(Math.min(video.state.volume + 5, 200));
         }
-    }, [menusOpen, nextVideoPopupOpen, video.state.volume]);
+    }, [video.state.volume], !menusOpen);
 
     onShortcut('volumeDown', () => {
-        if (!menusOpen && !nextVideoPopupOpen && video.state.volume !== null) {
+        if (video.state.volume !== null) {
             onVolumeChangeRequested(Math.min(video.state.volume - 5, 200));
         }
-    }, [menusOpen, nextVideoPopupOpen, video.state.volume]);
+    }, [video.state.volume], !menusOpen);
 
     onShortcut('subtitlesDelay', (combo) => {
         combo === 1 ? onIncreaseSubtitlesDelay() : onDecreaseSubtitlesDelay();
