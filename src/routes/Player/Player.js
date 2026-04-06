@@ -667,7 +667,7 @@ const Player = ({ urlParams, queryParams }) => {
 
     onShortcut('mute', () => {
         video.state.muted === true ? onUnmuteRequested() : onMuteRequested();
-    }, [video.state.muted]);
+    }, [video.state.muted], !menusOpen);
 
     onShortcut('volumeUp', () => {
         if (video.state.volume !== null) {
@@ -683,11 +683,11 @@ const Player = ({ urlParams, queryParams }) => {
 
     onShortcut('subtitlesDelay', (combo) => {
         combo === 1 ? onIncreaseSubtitlesDelay() : onDecreaseSubtitlesDelay();
-    }, [onIncreaseSubtitlesDelay, onDecreaseSubtitlesDelay]);
+    }, [onIncreaseSubtitlesDelay, onDecreaseSubtitlesDelay], !menusOpen);
 
     onShortcut('subtitlesSize', (combo) => {
         combo === 1 ? onUpdateSubtitlesSize(-1) : onUpdateSubtitlesSize(1);
-    }, [onUpdateSubtitlesSize, onUpdateSubtitlesSize]);
+    }, [onUpdateSubtitlesSize, onUpdateSubtitlesSize], !menusOpen);
 
     onShortcut('toggleSubtitles', () => {
         const savedTrack = player.streamState?.subtitleTrack;
@@ -700,7 +700,7 @@ const Player = ({ urlParams, queryParams }) => {
         }
 
         subtitlesEnabled.current = !subtitlesEnabled.current;
-    }, [player.streamState]);
+    }, [player.streamState], !menusOpen);
 
     onShortcut('subtitlesMenu', () => {
         closeMenus();
@@ -734,13 +734,13 @@ const Player = ({ urlParams, queryParams }) => {
         if (video.state.playbackSpeed !== null) {
             onPlaybackSpeedChanged(Math.min(video.state.playbackSpeed + 0.25, 2));
         }
-    }, [video.state.playbackSpeed, onPlaybackSpeedChanged]);
+    }, [video.state.playbackSpeed, onPlaybackSpeedChanged], !menusOpen);
 
     onShortcut('speedDown', () => {
         if (video.state.playbackSpeed !== null) {
             onPlaybackSpeedChanged(Math.max(video.state.playbackSpeed - 0.25, 0.25));
         }
-    }, [video.state.playbackSpeed, onPlaybackSpeedChanged]);
+    }, [video.state.playbackSpeed, onPlaybackSpeedChanged], !menusOpen);
 
     onShortcut('statisticsMenu', () => {
         closeMenus();
