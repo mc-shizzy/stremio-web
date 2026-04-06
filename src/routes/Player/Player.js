@@ -766,6 +766,7 @@ const Player = ({ urlParams, queryParams }) => {
 
     React.useLayoutEffect(() => {
         if (menusOpen) {
+            clearTimeout(pressTimer.current);
             pressTimer.current = null;
             longPress.current = false;
         }
