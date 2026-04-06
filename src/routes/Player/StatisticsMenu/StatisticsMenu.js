@@ -8,8 +8,11 @@ const styles = require('./styles.less');
 
 const StatisticsMenu = React.memo(React.forwardRef(({ className, peers, speed, completed, infoHash }, ref) => {
     const { t } = useTranslation();
+    const onMouseDown = React.useCallback((event) => {
+        event.nativeEvent.statisticsMenuClosePrevented = true;
+    }, []);
     return (
-        <div ref={ref} className={classNames(className, styles['statistics-menu-container'])}>
+        <div ref={ref} className={classNames(className, styles['statistics-menu-container'])} onMouseDown={onMouseDown}>
             <div className={styles['title']}>
                 {t('PLAYER_STATISTICS')}
             </div>
