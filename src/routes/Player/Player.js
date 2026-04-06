@@ -765,9 +765,14 @@ const Player = ({ urlParams, queryParams }) => {
     }, [settings.escExitFullscreen]);
 
     React.useLayoutEffect(() => {
+        if (menusOpen) {
+            pressTimer.current = null;
+            longPress.current = false;
+        }
+
         const onKeyDown = (e) => {
             if (e.code !== 'Space' || e.repeat) return;
-            if (menusOpen || nextVideoPopupOpen) return;
+            if (menusOpen) return;
 
             longPress.current = false;
 
@@ -805,7 +810,7 @@ const Player = ({ urlParams, queryParams }) => {
 
         const onMouseDownHold = (e) => {
             if (e.button !== 0) return; // left mouse button only
-            if (menusOpen || nextVideoPopupOpen) return;
+            if (menusOpen) return;
             if (controlBarRef.current && controlBarRef.current.contains(e.target)) return;
 
             longPress.current = false;
