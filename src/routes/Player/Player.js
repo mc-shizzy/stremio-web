@@ -72,8 +72,8 @@ const Player = ({ urlParams, queryParams }) => {
     const [sideDrawerOpen, , closeSideDrawer, toggleSideDrawer] = useBinaryState(false);
 
     const menusOpen = React.useMemo(() => {
-        return optionsMenuOpen || subtitlesMenuOpen || audioMenuOpen || speedMenuOpen || statisticsMenuOpen || sideDrawerOpen;
-    }, [optionsMenuOpen, subtitlesMenuOpen, audioMenuOpen, speedMenuOpen, statisticsMenuOpen, sideDrawerOpen]);
+        return optionsMenuOpen || subtitlesMenuOpen || audioMenuOpen || speedMenuOpen || statisticsMenuOpen || sideDrawerOpen || nextVideoPopupOpen;
+    }, [optionsMenuOpen, subtitlesMenuOpen, audioMenuOpen, speedMenuOpen, statisticsMenuOpen, sideDrawerOpen, nextVideoPopupOpen]);
 
     const closeMenus = React.useCallback(() => {
         closeOptionsMenu();
@@ -85,8 +85,8 @@ const Player = ({ urlParams, queryParams }) => {
     }, []);
 
     const overlayHidden = React.useMemo(() => {
-        return immersed && !casting && video.state.paused !== null && !video.state.paused && !menusOpen && !nextVideoPopupOpen;
-    }, [immersed, casting, video.state.paused, menusOpen, nextVideoPopupOpen]);
+        return immersed && !casting && video.state.paused !== null && !video.state.paused && !menusOpen;
+    }, [immersed, casting, video.state.paused, menusOpen]);
 
     const nextVideoPopupDismissed = React.useRef(false);
     const defaultSubtitlesSelected = React.useRef(false);
@@ -639,7 +639,7 @@ const Player = ({ urlParams, queryParams }) => {
     }, [player.nextVideo, onPlayRequested, onPauseRequested, onNextVideoRequested]);
 
     onShortcut('playPause', () => {
-        if (!menusOpen && !nextVideoPopupOpen && video.state.paused !== null) {
+        if (video.state.paused !== null) {
             if (video.state.paused) {
                 onPlayRequested();
                 setSeeking(false);
@@ -647,47 +647,47 @@ const Player = ({ urlParams, queryParams }) => {
                 onPauseRequested();
             }
         }
-    }, [menusOpen, nextVideoPopupOpen, video.state.paused, pressTimer.current, onPlayRequested, onPauseRequested]);
+    }, [video.state.paused, pressTimer.current, onPlayRequested, onPauseRequested], !menusOpen);
 
     onShortcut('seekForward', (combo) => {
-        if (!menusOpen && !nextVideoPopupOpen && video.state.time !== null) {
+        if (video.state.time !== null) {
             const seekDuration = combo === 1 ? settings.seekShortTimeDuration : settings.seekTimeDuration;
             setSeeking(true);
             onSeekRequested(video.state.time + seekDuration);
         }
-    }, [menusOpen, nextVideoPopupOpen, video.state.time, onSeekRequested]);
+    }, [video.state.time, onSeekRequested], !menusOpen);
 
     onShortcut('seekBackward', (combo) => {
-        if (!menusOpen && !nextVideoPopupOpen && video.state.time !== null) {
+        if (video.state.time !== null) {
             const seekDuration = combo === 1 ? settings.seekShortTimeDuration : settings.seekTimeDuration;
             setSeeking(true);
             onSeekRequested(video.state.time - seekDuration);
         }
-    }, [menusOpen, nextVideoPopupOpen, video.state.time, onSeekRequested]);
+    }, [video.state.time, onSeekRequested], !menusOpen);
 
     onShortcut('mute', () => {
         video.state.muted === true ? onUnmuteRequested() : onMuteRequested();
-    }, [video.state.muted]);
+    }, [video.state.muted], !menusOpen);
 
     onShortcut('volumeUp', () => {
-        if (!menusOpen && !nextVideoPopupOpen && video.state.volume !== null) {
+        if (video.state.volume !== null) {
             onVolumeChangeRequested(Math.min(video.state.volume + 5, 200));
         }
-    }, [menusOpen, nextVideoPopupOpen, video.state.volume]);
+    }, [video.state.volume], !menusOpen);
 
     onShortcut('volumeDown', () => {
-        if (!menusOpen && !nextVideoPopupOpen && video.state.volume !== null) {
+        if (video.state.volume !== null) {
             onVolumeChangeRequested(Math.min(video.state.volume - 5, 200));
         }
-    }, [menusOpen, nextVideoPopupOpen, video.state.volume]);
+    }, [video.state.volume], !menusOpen);
 
     onShortcut('subtitlesDelay', (combo) => {
         combo === 1 ? onIncreaseSubtitlesDelay() : onDecreaseSubtitlesDelay();
-    }, [onIncreaseSubtitlesDelay, onDecreaseSubtitlesDelay]);
+    }, [onIncreaseSubtitlesDelay, onDecreaseSubtitlesDelay], !menusOpen);
 
     onShortcut('subtitlesSize', (combo) => {
         combo === 1 ? onUpdateSubtitlesSize(-1) : onUpdateSubtitlesSize(1);
-    }, [onUpdateSubtitlesSize, onUpdateSubtitlesSize]);
+    }, [onUpdateSubtitlesSize, onUpdateSubtitlesSize], !menusOpen);
 
     onShortcut('toggleSubtitles', () => {
         const savedTrack = player.streamState?.subtitleTrack;
@@ -700,7 +700,7 @@ const Player = ({ urlParams, queryParams }) => {
         }
 
         subtitlesEnabled.current = !subtitlesEnabled.current;
-    }, [player.streamState]);
+    }, [player.streamState], !menusOpen);
 
     onShortcut('subtitlesMenu', () => {
         closeMenus();
@@ -734,13 +734,13 @@ const Player = ({ urlParams, queryParams }) => {
         if (video.state.playbackSpeed !== null) {
             onPlaybackSpeedChanged(Math.min(video.state.playbackSpeed + 0.25, 2));
         }
-    }, [video.state.playbackSpeed, onPlaybackSpeedChanged]);
+    }, [video.state.playbackSpeed, onPlaybackSpeedChanged], !menusOpen);
 
     onShortcut('speedDown', () => {
         if (video.state.playbackSpeed !== null) {
             onPlaybackSpeedChanged(Math.max(video.state.playbackSpeed - 0.25, 0.25));
         }
-    }, [video.state.playbackSpeed, onPlaybackSpeedChanged]);
+    }, [video.state.playbackSpeed, onPlaybackSpeedChanged], !menusOpen);
 
     onShortcut('statisticsMenu', () => {
         closeMenus();
@@ -765,9 +765,15 @@ const Player = ({ urlParams, queryParams }) => {
     }, [settings.escExitFullscreen]);
 
     React.useLayoutEffect(() => {
+        if (menusOpen) {
+            clearTimeout(pressTimer.current);
+            pressTimer.current = null;
+            longPress.current = false;
+        }
+
         const onKeyDown = (e) => {
             if (e.code !== 'Space' || e.repeat) return;
-            if (menusOpen || nextVideoPopupOpen) return;
+            if (menusOpen) return;
 
             longPress.current = false;
 
@@ -805,7 +811,7 @@ const Player = ({ urlParams, queryParams }) => {
 
         const onMouseDownHold = (e) => {
             if (e.button !== 0) return; // left mouse button only
-            if (menusOpen || nextVideoPopupOpen) return;
+            if (menusOpen) return;
             if (controlBarRef.current && controlBarRef.current.contains(e.target)) return;
 
             longPress.current = false;
