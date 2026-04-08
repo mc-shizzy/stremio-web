@@ -94,7 +94,11 @@ const MetaDetails = ({ urlParams, queryParams }) => {
     const handleEpisodeSearch = React.useCallback((season, episode) => {
         const searchVideoHash = encodeURIComponent(`${urlParams.id}:${season}:${episode}`);
         const url = window.location.hash;
-        const searchVideoPath = url.replace(encodeURIComponent(urlParams.videoId), searchVideoHash);
+
+        const searchVideoPath = (urlParams.videoId === undefined || urlParams.videoId === null || urlParams.videoId === '') ?
+            url + (!url.endsWith('/') ? '/' : '') + searchVideoHash
+            : url.replace(encodeURIComponent(urlParams.videoId), searchVideoHash);
+
         window.location = searchVideoPath;
     }, [urlParams, window.location]);
 
@@ -143,20 +147,20 @@ const MetaDetails = ({ urlParams, queryParams }) => {
                     metaPath === null ?
                         <DelayedRenderer delay={500}>
                             <div className={styles['meta-message-container']}>
-                                <Image className={styles['image']} src={require('/images/empty.png')} alt={' '} />
+                                <Image className={styles['image']} src={require('/assets/images/empty.png')} alt={' '} />
                                 <div className={styles['message-label']}>{t('ERR_NO_META_SELECTED')}</div>
                             </div>
                         </DelayedRenderer>
                         :
                         metaDetails.metaItem === null ?
                             <div className={styles['meta-message-container']}>
-                                <Image className={styles['image']} src={require('/images/empty.png')} alt={' '} />
+                                <Image className={styles['image']} src={require('/assets/images/empty.png')} alt={' '} />
                                 <div className={styles['message-label']}>{t('ERR_NO_ADDONS_FOR_META')}</div>
                             </div>
                             :
                             metaDetails.metaItem.content.type === 'Err' ?
                                 <div className={styles['meta-message-container']}>
-                                    <Image className={styles['image']} src={require('/images/empty.png')} alt={' '} />
+                                    <Image className={styles['image']} src={require('/assets/images/empty.png')} alt={' '} />
                                     <div className={styles['message-label']}>{t('ERR_NO_META_FOUND')}</div>
                                 </div>
                                 :

@@ -8,6 +8,7 @@ const { default: Icon } = require('@stremio/stremio-icons/react');
 const { usePlatform, useBinaryState, withCoreSuspender } = require('stremio/common');
 const { AddonDetailsModal, Button, Image, MainNavBars, ModalDialog, SearchBar, SharePrompt, TextInput, MultiselectMenu } = require('stremio/components');
 const { useServices } = require('stremio/services');
+const useToast = require('stremio/common/Toast/useToast');
 const Addon = require('./Addon');
 const useInstalledAddons = require('./useInstalledAddons');
 const useRemoteAddons = require('./useRemoteAddons');
@@ -20,6 +21,7 @@ const Addons = ({ urlParams, queryParams }) => {
     const { t } = useTranslation();
     const platform = usePlatform();
     const { core } = useServices();
+    const toast = useToast();
     const installedAddons = useInstalledAddons(urlParams);
     const remoteAddons = useRemoteAddons(urlParams);
     const [addonDetailsTransportUrl, setAddonDetailsTransportUrl] = useAddonDetailsTransportUrl(urlParams, queryParams);
@@ -29,7 +31,17 @@ const Addons = ({ urlParams, queryParams }) => {
     const addAddonUrlInputRef = React.useRef(null);
     const addAddonOnSubmit = React.useCallback(() => {
         if (addAddonUrlInputRef.current !== null) {
-            setAddonDetailsTransportUrl(addAddonUrlInputRef.current.value);
+            try {
+                let url = new URL(addAddonUrlInputRef.current.value).toString();
+                setAddonDetailsTransportUrl(url);
+            } catch (e) {
+                toast.show({
+                    type: 'error',
+                    title: `Failed to parse addon url: ${addAddonUrlInputRef.current.value}`,
+                    timeout: 10000
+                });
+                console.error('Failed to parse addon url:', e);
+            }
         }
     }, [setAddonDetailsTransportUrl]);
     const addAddonModalButtons = React.useMemo(() => {

@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import isEqual from 'lodash.isequal';
+import { deepEqual } from 'fast-equals';
 import { useServices } from 'stremio/services';
 
 const CACHE_SIZES = [0, 2147483648, 5368709120, 10737418240, null];
@@ -160,7 +160,7 @@ const useStreamingOptions = (streamingServer: StreamingServer) => {
             btRequestTimeout: settings.btRequestTimeout
         };
         const isCustomTorrentProfileSelected = Object.values(TORRENT_PROFILES).every((torrentProfile) => {
-            return !isEqual(torrentProfile, selectedTorrentProfile);
+            return !deepEqual(torrentProfile, selectedTorrentProfile);
         });
         return {
             options: Object.keys(TORRENT_PROFILES)

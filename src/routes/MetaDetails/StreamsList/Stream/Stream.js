@@ -86,7 +86,15 @@ const Stream = ({ className, videoId, videoReleased, addonName, name, descriptio
     }, [href, deepLinks]);
 
     const streamLink = React.useMemo(() => {
+        return deepLinks?.externalPlayer?.streaming;
+    }, [deepLinks]);
+
+    const downloadLink = React.useMemo(() => {
         return deepLinks?.externalPlayer?.download;
+    }, [deepLinks]);
+
+    const magnetLink = React.useMemo(() => {
+        return deepLinks?.externalPlayer?.magnet;
     }, [deepLinks]);
 
     const markVideoAsWatched = React.useCallback(() => {
@@ -102,6 +110,10 @@ const Stream = ({ className, videoId, videoReleased, addonName, name, descriptio
     }, [videoId, videoReleased]);
 
     const onClick = React.useCallback((event) => {
+        if (event.nativeEvent.togglePopupPrevented) {
+            return;
+        }
+
         if (profile.settings.playerType !== null) {
             markVideoAsWatched();
             toast.show({
@@ -115,6 +127,50 @@ const Stream = ({ className, videoId, videoReleased, addonName, name, descriptio
             props.onClick(event);
         }
     }, [props.onClick, profile.settings, markVideoAsWatched]);
+
+    const copyMagnetLink = React.useCallback((event) => {
+        event.preventDefault();
+        closeMenu();
+        if (magnetLink) {
+            navigator.clipboard.writeText(magnetLink)
+                .then(() => {
+                    toast.show({
+                        type: 'success',
+                        title: t('PLAYER_COPY_MAGNET_LINK_SUCCESS'),
+                        timeout: 4000
+                    });
+                })
+                .catch(() => {
+                    toast.show({
+                        type: 'error',
+                        title: t('PLAYER_COPY_MAGNET_LINK_ERROR'),
+                        timeout: 4000,
+                    });
+                });
+        }
+    }, [magnetLink]);
+
+    const copyDownloadLink = React.useCallback((event) => {
+        event.preventDefault();
+        closeMenu();
+        if (downloadLink) {
+            navigator.clipboard.writeText(downloadLink)
+                .then(() => {
+                    toast.show({
+                        type: 'success',
+                        title: t('PLAYER_COPY_DOWNLOAD_LINK_SUCCESS'),
+                        timeout: 4000
+                    });
+                })
+                .catch(() => {
+                    toast.show({
+                        type: 'error',
+                        title: t('PLAYER_COPY_DOWNLOAD_LINK_ERROR'),
+                        timeout: 4000,
+                    });
+                });
+        }
+    }, [downloadLink]);
 
     const copyStreamLink = React.useCallback((event) => {
         event.preventDefault();
@@ -195,6 +251,20 @@ const Stream = ({ className, videoId, videoReleased, addonName, name, descriptio
                             <div className={styles['context-menu-option-label']}>{t('CTX_COPY_STREAM_LINK')}</div>
                         </Button>
                 }
+                {
+                    magnetLink &&
+                        <Button className={styles['context-menu-option-container']} title={t('CTX_COPY_MAGNET_LINK')} onClick={copyMagnetLink}>
+                            <Icon className={styles['menu-icon']} name={'magnet-link'} />
+                            <div className={styles['context-menu-option-label']}>{t('CTX_COPY_MAGNET_LINK')}</div>
+                        </Button>
+                }
+                {
+                    downloadLink &&
+                        <Button className={styles['context-menu-option-container']} title={t('CTX_DOWNLOAD_VIDEO')} onClick={copyDownloadLink}>
+                            <Icon className={styles['menu-icon']} name={'download'} />
+                            <div className={styles['context-menu-option-label']}>{t('CTX_COPY_VIDEO_DOWNLOAD_LINK')}</div>
+                        </Button>
+                }
             </div>
         );
     }, [copyStreamLink, onClick]);
@@ -234,6 +304,7 @@ Stream.propTypes = {
         player: PropTypes.string,
         externalPlayer: PropTypes.shape({
             download: PropTypes.string,
+            magnet: PropTypes.string,
             streaming: PropTypes.string,
             playlist: PropTypes.string,
             fileName: PropTypes.string,

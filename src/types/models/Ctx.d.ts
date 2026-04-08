@@ -42,6 +42,7 @@ type Settings = {
     subtitlesOutlineColor: string,
     subtitlesSize: number,
     subtitlesTextColor: string,
+    assSubtitlesStyling: boolean,
     surroundSound: boolean,
     pauseOnMinimize: boolean,
 };

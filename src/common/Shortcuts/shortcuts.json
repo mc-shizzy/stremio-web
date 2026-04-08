@@ -60,6 +60,11 @@
                 "combos": [["ArrowDown"]]
             },
             {
+                "name": "mute",
+                "label": "SETTINGS_SHORTCUT_MUTE",
+                "combos": [["M"]]
+            },
+            {
                 "name": "subtitlesSize",
                 "label": "SETTINGS_SHORTCUT_SUBTITLES_SIZE",
                 "combos": [["-"], ["="]]
@@ -68,6 +73,21 @@
                 "name": "subtitlesDelay",
                 "label": "SETTINGS_SHORTCUT_SUBTITLES_DELAY",
                 "combos": [["G"], ["H"]]
+            },
+            {
+                "name": "speedDown",
+                "label": "SETTINGS_SHORTCUT_DECREASE_PLAYBACK_SPEED",
+                "combos": [["["]]
+            },
+            {
+                "name": "speedUp",
+                "label": "SETTINGS_SHORTCUT_INCREASE_PLAYBACK_SPEED",
+                "combos": [["]"]]
+            },
+            {
+                "name": "toggleSubtitles",
+                "label": "SETTINGS_SHORTCUT_TOGGLE_SUBTITLES",
+                "combos": [["C"]]
             },
             {
                 "name": "subtitlesMenu",
@@ -83,6 +103,21 @@
                 "name": "infoMenu",
                 "label": "SETTINGS_SHORTCUT_MENU_INFO",
                 "combos": [["I"]]
+            },
+            {
+                "name": "speedMenu",
+                "label": "SETTINGS_SHORTCUT_MENU_PLAYBACK_SPEED",
+                "combos": [["R"]]
+            },
+            {
+                "name": "statisticsMenu",
+                "label": "SETTINGS_SHORTCUT_MENU_STATISTICS",
+                "combos": [["D"]]
+            },
+            {
+                "name": "playNext",
+                "label": "SETTINGS_SHORTCUT_PLAY_NEXT",
+                "combos": [["Shift", "N"]]
             }
         ]
     }

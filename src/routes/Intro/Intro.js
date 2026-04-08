@@ -183,7 +183,7 @@ const Intro = ({ queryParams }) => {
             return;
         }
         if (!state.privacyPolicyAccepted) {
-            dispatch({ type: 'error', error: 'You must accept the Privacy Policy' });
+            dispatch({ type: 'error', error: t('MUST_ACCEPT_PRIVACY_POLICY') });
             return;
         }
         openLoaderModal();
@@ -296,7 +296,7 @@ const Intro = ({ queryParams }) => {
             <div className={styles['background-container']} />
             <div className={styles['heading-container']}>
                 <div className={styles['logo-container']}>
-                    <Image className={styles['logo']} src={require('/images/logo.png')} alt={' '} />
+                    <Image className={styles['logo']} src={require('/assets/images/logo.png')} alt={' '} />
                 </div>
                 <div className={styles['title-container']}>
                     {t('WEBSITE_SLOGAN_NEW_NEW')}

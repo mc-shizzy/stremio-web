@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { interfaceLanguages, useLanguageSorting } from 'stremio/common';
 import { useServices } from 'stremio/services';
 
-const useGeneralOptions = (profile: Profile) => {
+const useInterfaceOptions = (profile: Profile) => {
     const { core } = useServices();
 
     const interfaceLanguageOptions = useMemo(() =>
@@ -89,4 +89,4 @@ const useGeneralOptions = (profile: Profile) => {
     };
 };
 
-export default useGeneralOptions;
+export default useInterfaceOptions;

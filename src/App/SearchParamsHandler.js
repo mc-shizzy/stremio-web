@@ -1,7 +1,7 @@
 // Copyright (C) 2017-2023 Smart code 203358507
 
 const React = require('react');
-const isEqual = require('lodash.isequal');
+const { deepEqual } = require('fast-equals');
 const { withCoreSuspender, useProfile, useToast } = require('stremio/common');
 const { useServices } = require('stremio/services');
 
@@ -18,7 +18,7 @@ const SearchParamsHandler = () => {
 
         setSearchParams((previousSearchParams) => {
             const currentSearchParams = Object.fromEntries(searchParams.entries());
-            return isEqual(previousSearchParams, currentSearchParams) ? previousSearchParams : currentSearchParams;
+            return deepEqual(previousSearchParams, currentSearchParams) ? previousSearchParams : currentSearchParams;
         });
     };
 
