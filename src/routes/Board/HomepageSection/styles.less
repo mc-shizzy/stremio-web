@@ -1,0 +1,115 @@
+// Copyright (C) 2017-2023 Smart code 203358507
+
+@import (reference) '~@stremio/stremio-colors/less/stremio-colors.less';
+@import (reference) '~stremio/common/screen-sizes.less';
+
+.homepage-section-container {
+    margin-bottom: 2rem;
+
+    .header-container {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-end;
+        padding: 0 1rem;
+        margin-bottom: 0.5rem;
+
+        .title-container {
+            flex: 1;
+            max-height: 2.4em;
+            font-size: 1.6rem;
+            font-weight: 500;
+            color: var(--primary-foreground-color);
+        }
+
+        .see-all-container {
+            flex: none;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            max-width: 12rem;
+            height: 2.5rem;
+            padding: 0 0.5rem 0 1rem;
+            border-radius: 2.5rem;
+            opacity: 0.6;
+
+            &:hover, &:focus {
+                outline: none;
+                background-color: var(--overlay-color);
+                opacity: 1;
+            }
+
+            .label {
+                flex: 0 1 auto;
+                max-height: 1.2em;
+                font-size: 1rem;
+                font-weight: 500;
+                color: var(--primary-foreground-color);
+            }
+
+            .icon {
+                flex: none;
+                height: 1.5rem;
+                margin-left: 0.5rem;
+                color: var(--primary-foreground-color);
+            }
+        }
+    }
+
+    .items-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 0;
+        padding: 0 0.5rem;
+    }
+}
+
+// Tablet
+@media only screen and (max-width: @small) {
+    .homepage-section-container {
+        .items-grid {
+            grid-template-columns: repeat(5, 1fr);
+        }
+    }
+}
+
+@media only screen and (max-width: @medium) and (min-width: (@small + 1px)) {
+    .homepage-section-container {
+        .items-grid {
+            grid-template-columns: repeat(6, 1fr);
+        }
+    }
+}
+
+// Small tablet
+@media only screen and (max-width: @xsmall) {
+    .homepage-section-container {
+        .items-grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
+}
+
+// Mobile
+@media only screen and (max-width: @minimum) {
+    .homepage-section-container {
+        margin-bottom: 1.5rem;
+
+        .header-container {
+            padding: 0 0.5rem;
+
+            .title-container {
+                font-size: 1.2rem;
+                margin-right: 0.5rem;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                overflow: hidden;
+            }
+        }
+
+        .items-grid {
+            grid-template-columns: repeat(3, 1fr);
+            padding: 0 0.2rem;
+        }
+    }
+}
