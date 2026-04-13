@@ -2,111 +2,69 @@
 
 const React = require('react');
 const classnames = require('classnames');
-const debounce = require('lodash.debounce');
-const useTranslate = require('stremio/common/useTranslate');
-const { useStreamingServer, useNotifications, withCoreSuspender, getVisibleChildrenRange, useProfile } = require('stremio/common');
-const { ContinueWatchingItem, EventModal, MainNavBars, MetaItem, MetaRow } = require('stremio/components');
-const useBoard = require('./useBoard');
-const useContinueWatchingPreview = require('./useContinueWatchingPreview');
+const { withCoreSuspender } = require('stremio/common');
+const { EventModal, MainNavBars } = require('stremio/components');
+const useHomepageAPI = require('./useHomepageAPI');
+const HomepageSection = require('./HomepageSection');
+const SeeAll = require('./SeeAll');
 const styles = require('./styles');
-const { default: StreamingServerWarning } = require('./StreamingServerWarning');
-
-const THRESHOLD = 5;
 
 const Board = () => {
-    const t = useTranslate();
-    const streamingServer = useStreamingServer();
-    const continueWatchingPreview = useContinueWatchingPreview();
-    const [board, loadBoardRows] = useBoard();
-    const notifications = useNotifications();
-    const profile = useProfile();
-    const boardCatalogsOffset = continueWatchingPreview.items.length > 0 ? 1 : 0;
-    const scrollContainerRef = React.useRef();
-    const showStreamingServerWarning = React.useMemo(() => {
-        return streamingServer.settings !== null && streamingServer.settings.type === 'Err' && (
-            isNaN(profile.settings.streamingServerWarningDismissed.getTime()) ||
-            profile.settings.streamingServerWarningDismissed.getTime() < Date.now());
-    }, [profile.settings, streamingServer.settings]);
-    const onVisibleRangeChange = React.useCallback(() => {
-        const range = getVisibleChildrenRange(scrollContainerRef.current);
-        if (range === null) {
-            return;
-        }
+    const { sections, loading, error } = useHomepageAPI();
+    const [seeAllIndex, setSeeAllIndex] = React.useState(null);
 
-        const start = Math.max(0, range.start - boardCatalogsOffset - THRESHOLD);
-        const end = range.end - boardCatalogsOffset + THRESHOLD;
-        if (end < start) {
-            return;
-        }
+    // Listen for hash changes to handle #/board/section/:index
+    React.useEffect(() => {
+        const onHashChange = () => {
+            const hash = window.location.hash;
+            const match = hash.match(/^#\/board\/section\/(\d+)$/);
+            if (match) {
+                setSeeAllIndex(parseInt(match[1], 10));
+            } else if (hash === '#/' || hash === '#/board' || hash === '' || hash === '#') {
+                setSeeAllIndex(null);
+            }
+        };
+        window.addEventListener('hashchange', onHashChange);
+        onHashChange();
+        return () => window.removeEventListener('hashchange', onHashChange);
+    }, []);
 
-        loadBoardRows({ start, end });
-    }, [boardCatalogsOffset]);
-    const onScroll = React.useCallback(debounce(onVisibleRangeChange, 250), [onVisibleRangeChange]);
-    React.useLayoutEffect(() => {
-        onVisibleRangeChange();
-    }, [board.catalogs, onVisibleRangeChange]);
+    // If viewing a "See All" section
+    if (seeAllIndex !== null && sections[seeAllIndex]) {
+        const section = sections[seeAllIndex];
+        return (
+            <SeeAll title={section.title} items={section.items} />
+        );
+    }
+
     return (
         <div className={styles['board-container']}>
             <EventModal />
             <MainNavBars className={styles['board-content-container']} route={'board'}>
-                <div ref={scrollContainerRef} className={styles['board-content']} onScroll={onScroll}>
+                <div className={styles['board-content']}>
                     {
-                        continueWatchingPreview.items.length > 0 ?
-                            <MetaRow
-                                className={classnames(styles['board-row'], styles['continue-watching-row'], 'animation-fade-in')}
-                                title={t.string('BOARD_CONTINUE_WATCHING')}
-                                catalog={continueWatchingPreview}
-                                itemComponent={ContinueWatchingItem}
-                                notifications={notifications}
-                            />
+                        loading ?
+                            <div className={styles['loader-container']}>
+                                <div className={styles['loader-text']}>Loading...</div>
+                            </div>
                             :
-                            null
+                            error ?
+                                <div className={styles['error-container']}>
+                                    <div className={styles['error-text']}>Failed to load content: {error}</div>
+                                </div>
+                                :
+                                sections.map((section, index) => (
+                                    <HomepageSection
+                                        key={index}
+                                        className={classnames(styles['board-row'], 'animation-fade-in')}
+                                        title={section.title}
+                                        items={section.items}
+                                        sectionIndex={index}
+                                    />
+                                ))
                     }
-                    {board.catalogs.map((catalog, index) => {
-                        switch (catalog.content?.type) {
-                            case 'Ready': {
-                                return (
-                                    <MetaRow
-                                        key={index}
-                                        className={classnames(styles['board-row'], styles[`board-row-${catalog.content.content[0].posterShape}`], 'animation-fade-in')}
-                                        catalog={catalog}
-                                        itemComponent={MetaItem}
-                                    />
-                                );
-                            }
-                            case 'Err': {
-                                if (catalog.content.content !== 'EmptyContent') {
-                                    return (
-                                        <MetaRow
-                                            key={index}
-                                            className={classnames(styles['board-row'], 'animation-fade-in')}
-                                            catalog={catalog}
-                                            message={catalog.content.content}
-                                        />
-                                    );
-                                }
-                                return null;
-                            }
-                            default: {
-                                return (
-                                    <MetaRow.Placeholder
-                                        key={index}
-                                        className={classnames(styles['board-row'], styles['board-row-poster'], 'animation-fade-in')}
-                                        catalog={catalog}
-                                        title={t.catalogTitle(catalog)}
-                                    />
-                                );
-                            }
-                        }
-                    })}
                 </div>
             </MainNavBars>
-            {
-                showStreamingServerWarning ?
-                    <StreamingServerWarning className={styles['board-warning-container']} />
-                    :
-                    null
-            }
         </div>
     );
 };

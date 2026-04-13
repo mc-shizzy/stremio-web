@@ -1,0 +1,117 @@
+// Copyright (C) 2017-2023 Smart code 203358507
+
+@import (reference) '~@stremio/stremio-colors/less/stremio-colors.less';
+@import (reference) '~stremio/common/screen-sizes.less';
+
+.see-all-container {
+    width: 100%;
+    height: calc(100% - var(--safe-area-inset-bottom));
+    display: flex;
+    flex-direction: column;
+
+    .see-all-content-container {
+        flex: 1;
+        align-self: stretch;
+        background: transparent;
+
+        .see-all-content {
+            height: 100%;
+            width: 100%;
+            padding: 0 1rem;
+            overflow-y: auto;
+
+            .header {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                padding: 1rem 0;
+                gap: 1rem;
+
+                .back-button {
+                    flex: none;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 2.5rem;
+                    height: 2.5rem;
+                    border-radius: 50%;
+                    background-color: var(--overlay-color);
+
+                    &:hover, &:focus {
+                        outline: none;
+                        opacity: 0.8;
+                    }
+
+                    .back-icon {
+                        width: 1.5rem;
+                        height: 1.5rem;
+                        color: var(--primary-foreground-color);
+                    }
+                }
+
+                .title {
+                    flex: 1;
+                    font-size: 1.8rem;
+                    font-weight: 600;
+                    color: var(--primary-foreground-color);
+                }
+            }
+
+            .items-grid {
+                display: grid;
+                grid-template-columns: repeat(6, 1fr);
+                gap: 0;
+                padding-bottom: 2rem;
+            }
+        }
+    }
+}
+
+// Tablet
+@media only screen and (max-width: @small) {
+    .see-all-container {
+        .see-all-content-container {
+            .see-all-content {
+                .items-grid {
+                    grid-template-columns: repeat(5, 1fr);
+                }
+            }
+        }
+    }
+}
+
+// Small tablet
+@media only screen and (max-width: @xsmall) {
+    .see-all-container {
+        .see-all-content-container {
+            .see-all-content {
+                .items-grid {
+                    grid-template-columns: repeat(4, 1fr);
+                }
+            }
+        }
+    }
+}
+
+// Mobile
+@media only screen and (max-width: @minimum) {
+    .see-all-container {
+        .see-all-content-container {
+            .see-all-content {
+                padding: 0 0.5rem;
+
+                .header {
+                    padding: 0.5rem 0;
+
+                    .title {
+                        font-size: 1.3rem;
+                    }
+                }
+
+                .items-grid {
+                    grid-template-columns: repeat(3, 1fr);
+                }
+            }
+        }
+    }
+}
