@@ -10,7 +10,8 @@ const { Button } = require('stremio/components');
 const { default: useFullscreen } = require('stremio/common/useFullscreen');
 const useProfile = require('stremio/common/useProfile');
 const usePWA = require('stremio/common/usePWA');
-const useTorrent = require('stremio/common/useTorrent');
+const { default: usePlayUrl } = require('stremio/common/usePlayUrl');
+const useToast = require('stremio/common/Toast/useToast');
 const { withCoreSuspender } = require('stremio/common/CoreSuspender');
 const useStreamingServer = require('stremio/common/useStreamingServer');
 const styles = require('./styles');
@@ -20,7 +21,8 @@ const NavMenuContent = ({ onClick }) => {
     const { core } = useServices();
     const profile = useProfile();
     const streamingServer = useStreamingServer();
-    const { createTorrentFromMagnet } = useTorrent();
+    const { handlePlayUrl } = usePlayUrl();
+    const toast = useToast();
     const [fullscreen, requestFullscreen, exitFullscreen] = useFullscreen();
     const [isIOSPWA, isAndroidPWA] = usePWA();
     const streamingServerWarningDismissed = React.useMemo(() => {
@@ -40,11 +42,18 @@ const NavMenuContent = ({ onClick }) => {
     const onPlayMagnetLinkClick = React.useCallback(async () => {
         try {
             const clipboardText = await navigator.clipboard.readText();
-            createTorrentFromMagnet(clipboardText);
+            const handled = await handlePlayUrl(clipboardText);
+            if (!handled) {
+                toast.show({
+                    type: 'error',
+                    title: 'Clipboard does not contain a valid URL or magnet link.',
+                    timeout: 5000
+                });
+            }
         } catch(e) {
             console.error(e);
         }
-    }, []);
+    }, [handlePlayUrl]);
     return (
         <div className={classnames(styles['nav-menu-container'], 'animation-fade-in', { [styles['with-warning']]: !streamingServerWarningDismissed } )} onClick={onClick}>
             <div className={styles['user-info-container']}>
