@@ -18,8 +18,8 @@ importers:
         specifier: 5.2.0
         version: 5.2.0
       '@stremio/stremio-core-web':
-        specifier: 0.56.3
-        version: 0.56.3
+        specifier: https://stremio.github.io/stremio-core/stremio-core-web/fix/decode-trackers-if-arrived-encoded/dev/stremio-stremio-core-web-0.56.2.tgz
+        version: https://stremio.github.io/stremio-core/stremio-core-web/fix/decode-trackers-if-arrived-encoded/dev/stremio-stremio-core-web-0.56.2.tgz
       '@stremio/stremio-icons':
         specifier: 5.8.0
         version: 5.8.0
@@ -1120,8 +1120,9 @@ packages:
   '@stremio/stremio-colors@5.2.0':
     resolution: {integrity: sha512-dYlPgu9W/H7c9s1zmW5tiDnRenaUa4Hg1QCyOg1lhOcgSfM/bVTi5nnqX+IfvGTTUNA0zgzh8hI3o3miwnZxTg==}
 
-  '@stremio/stremio-core-web@0.56.3':
-    resolution: {integrity: sha512-+BBErhza9DACHfzJwuHUnWgUsCCtVutFo1a8r4PVBrzxEkeb6ad/RO+BpStNz8w+BdGDddPctJPyl0FwLtzTWQ==}
+  '@stremio/stremio-core-web@https://stremio.github.io/stremio-core/stremio-core-web/fix/decode-trackers-if-arrived-encoded/dev/stremio-stremio-core-web-0.56.2.tgz':
+    resolution: {tarball: https://stremio.github.io/stremio-core/stremio-core-web/fix/decode-trackers-if-arrived-encoded/dev/stremio-stremio-core-web-0.56.2.tgz}
+    version: 0.56.2
 
   '@stremio/stremio-icons@5.8.0':
     resolution: {integrity: sha512-IVUvQbIWfA4YEHCTed7v/sdQJCJ+OOCf84LTWpkE2W6GLQ+15WHcMEJrVkE1X3ekYJnGg3GjT0KLO6tKSU0P4w==}
@@ -4470,8 +4471,8 @@ packages:
     resolution: {integrity: sha512-Dhxzh5HZuiHQhbvTW9AMetFfBHDMYpo23Uo9btPXgdYP+3T5S+p+jgNy7spra+veYhBP2dCSgxR/i2Y02h5/6w==}
     engines: {node: '>=0.10.0'}
 
-  vtt.js@git+https://git@github.com:jaruba/vtt.js.git#84d33d157848407d790d78423dacc41a096294f0:
-    resolution: {commit: 84d33d157848407d790d78423dacc41a096294f0, repo: git@github.com:jaruba/vtt.js.git, type: git}
+  vtt.js@https://codeload.github.com/jaruba/vtt.js/tar.gz/84d33d157848407d790d78423dacc41a096294f0:
+    resolution: {tarball: https://codeload.github.com/jaruba/vtt.js/tar.gz/84d33d157848407d790d78423dacc41a096294f0}
     version: 0.13.0
 
   walker@1.0.8:
@@ -5870,7 +5871,7 @@ snapshots:
 
   '@stremio/stremio-colors@5.2.0': {}
 
-  '@stremio/stremio-core-web@0.56.3':
+  '@stremio/stremio-core-web@https://stremio.github.io/stremio-core/stremio-core-web/fix/decode-trackers-if-arrived-encoded/dev/stremio-stremio-core-web-0.56.2.tgz':
     dependencies:
       '@babel/runtime': 7.24.1
 
@@ -5888,7 +5889,7 @@ snapshots:
       magnet-uri: 6.2.0
       url: 0.11.4
       video-name-parser: 1.4.6
-      vtt.js: git+https://git@github.com:jaruba/vtt.js.git#84d33d157848407d790d78423dacc41a096294f0
+      vtt.js: https://codeload.github.com/jaruba/vtt.js/tar.gz/84d33d157848407d790d78423dacc41a096294f0
 
   '@stylistic/eslint-plugin-jsx@4.4.1(eslint@9.36.0(jiti@1.21.7))':
     dependencies:
@@ -9717,7 +9718,7 @@ snapshots:
 
   void-elements@3.1.0: {}
 
-  vtt.js@git+https://git@github.com:jaruba/vtt.js.git#84d33d157848407d790d78423dacc41a096294f0: {}
+  vtt.js@https://codeload.github.com/jaruba/vtt.js/tar.gz/84d33d157848407d790d78423dacc41a096294f0: {}
 
   walker@1.0.8:
     dependencies:
