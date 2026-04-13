@@ -23,6 +23,11 @@ const Discover = ({ urlParams, queryParams }) => {
     const [addonModalOpen, openAddonModal, closeAddonModal] = useBinaryState(false);
     const [selectedMetaItemIndex, setSelectedMetaItemIndex] = React.useState(0);
 
+    const selectedMetaItem = React.useMemo(() => {
+        return discover.catalog?.content.type === 'Ready' &&
+            discover.catalog.content.content[selectedMetaItemIndex] || null;
+    }, [discover.catalog, selectedMetaItemIndex]);
+
     const metasContainerRef = React.useRef();
     const metaPreviewRef = React.useRef();
 
@@ -40,14 +45,6 @@ const Discover = ({ urlParams, queryParams }) => {
             }
         }
     }, [hasNextPage, loadNextPage]);
-    const selectedMetaItem = React.useMemo(() => {
-        return discover.catalog !== null &&
-            discover.catalog.content.type === 'Ready' &&
-            discover.catalog.content.content[selectedMetaItemIndex] ?
-            discover.catalog.content.content[selectedMetaItemIndex]
-            :
-            null;
-    }, [discover.catalog, selectedMetaItemIndex]);
     const addToLibrary = React.useCallback(() => {
         if (selectedMetaItem === null) {
             return;
@@ -71,6 +68,22 @@ const Discover = ({ urlParams, queryParams }) => {
             args: {
                 action: 'RemoveFromLibrary',
                 args: selectedMetaItem.id
+            }
+        });
+    }, [selectedMetaItem]);
+    const toggleWatched = React.useCallback(() => {
+        if (selectedMetaItem === null) {
+            return;
+        }
+
+        core.transport.dispatch({
+            action: 'Ctx',
+            args: {
+                action: 'MetaItemMarkAsWatched',
+                args: {
+                    meta_item: selectedMetaItem,
+                    is_watched: !selectedMetaItem.watched,
+                }
             }
         });
     }, [selectedMetaItem]);
@@ -193,6 +206,8 @@ const Discover = ({ urlParams, queryParams }) => {
                             trailerStreams={selectedMetaItem.trailerStreams}
                             inLibrary={selectedMetaItem.inLibrary}
                             toggleInLibrary={selectedMetaItem.inLibrary ? removeFromLibrary : addToLibrary}
+                            watched={selectedMetaItem.watched}
+                            toggleWatched={toggleWatched}
                             metaId={selectedMetaItem.id}
                             like={selectedMetaItem.like}
                         />

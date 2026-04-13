@@ -64,6 +64,19 @@ const MetaDetails = ({ urlParams, queryParams }) => {
             }
         });
     }, [metaDetails]);
+    const toggleWatched = React.useCallback(() => {
+        if (metaDetails.metaItem === null || metaDetails.metaItem.content.type !== 'Ready') {
+            return;
+        }
+
+        core.transport.dispatch({
+            action: 'MetaDetails',
+            args: {
+                action: 'MarkAsWatched',
+                args: !metaDetails.metaItem.content.content.watched
+            }
+        });
+    }, [metaDetails]);
     const toggleNotifications = React.useCallback(() => {
         if (metaDetails.libraryItem) {
             core.transport.dispatch({
@@ -172,6 +185,8 @@ const MetaDetails = ({ urlParams, queryParams }) => {
                                             trailerStreams={metaDetails.metaItem.content.content.trailerStreams}
                                             inLibrary={metaDetails.metaItem.content.content.inLibrary}
                                             toggleInLibrary={metaDetails.metaItem.content.content.inLibrary ? removeFromLibrary : addToLibrary}
+                                            watched={metaDetails.metaItem.content.content.watched}
+                                            toggleWatched={toggleWatched}
                                             metaId={metaDetails.metaItem.content.content.id}
                                             ratingInfo={metaDetails.ratingInfo}
                                         />
