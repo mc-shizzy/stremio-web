@@ -90,7 +90,11 @@ const Search = ({ queryParams }) => {
                                         return (
                                             <MetaRow
                                                 key={index}
-                                                className={classnames(styles['search-row'], styles[`search-row-${catalog.content.content[0].posterShape}`], 'animation-fade-in')}
+                                                className={classnames(
+                                                    styles['search-row'],
+                                                    styles[`search-row-${catalog.content.content[0]?.posterShape || 'poster'}`],
+                                                    'animation-fade-in'
+                                                )}
                                                 catalog={catalog}
                                                 itemComponent={MetaItem}
                                             />

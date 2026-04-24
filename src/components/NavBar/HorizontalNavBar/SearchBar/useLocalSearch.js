@@ -1,32 +1,48 @@
 // Copyright (C) 2017-2023 Smart code 203358507
 
 const React = require('react');
-const { useServices } = require('stremio/services');
-const useModelState = require('stremio/common/useModelState');
+
+const SEARCH_API_URL = 'https://apii.freehandyflix.online/api/search';
 
 const useLocalSearch = () => {
-    const { core } = useServices();
+    const [items, setItems] = React.useState([]);
+    const requestIdRef = React.useRef(0);
 
-    const action = React.useMemo(() => ({
-        action: 'Load',
-        args: {
-            model: 'LocalSearch',
+    const search = React.useCallback(async (query) => {
+        const normalizedQuery = typeof query === 'string' ? query.trim() : '';
+        if (!normalizedQuery) {
+            setItems([]);
+            return;
         }
-    }), []);
 
-    const { items } = useModelState({ model: 'local_search', action });
+        const requestId = ++requestIdRef.current;
 
-    const search = React.useCallback((query) => {
-        core.transport.dispatch({
-            action: 'Search',
-            args: {
-                action: 'Search',
-                args: {
-                    searchQuery: query,
-                    maxResults: 5
-                }
-            },
-        });
+        try {
+            const response = await fetch(`${SEARCH_API_URL}/${encodeURIComponent(normalizedQuery)}`);
+            if (!response.ok) {
+                throw new Error(`Search API failed with status ${response.status}`);
+            }
+
+            const data = await response.json();
+            const apiItems = Array.isArray(data?.data?.items) ? data.data.items : [];
+            const mappedItems = apiItems
+                .slice(0, 5)
+                .map(({ title }) => ({
+                    query: title,
+                    deepLinks: {
+                        search: `#/search?search=${encodeURIComponent(title)}`
+                    }
+                }))
+                .filter((item) => item.query?.length > 0);
+
+            if (requestId === requestIdRef.current) {
+                setItems(mappedItems);
+            }
+        } catch (error) {
+            if (requestId === requestIdRef.current) {
+                setItems([]);
+            }
+        }
     }, []);
 
     return {

@@ -1,66 +1,73 @@
 // Copyright (C) 2017-2023 Smart code 203358507
 
 const React = require('react');
-const { useModelState } = require('stremio/common');
-const { useServices } = require('stremio/services');
+
+const SEARCH_API_URL = 'https://apii.freehandyflix.online/api/search';
 
 const useSearch = (queryParams) => {
-    const { core } = useServices();
-    // TODO: refactor this to be in stremio-core-web
-    // React.useEffect(() => {
-    //     let timerId = setTimeout(emitSearchEvent, 500);
-    //     function emitSearchEvent() {
-    //         timerId = null;
-    //         const state = core.transport.getState('search');
-    //         if (state.selected !== null) {
-    //             const [, query] = state.selected.extra.find(([name]) => name === 'search');
-    //             const responses = state.catalogs.filter((catalog) => catalog.content?.type === 'Ready');
-    //             core.transport.analytics({
-    //                 event: 'Search',
-    //                 args: {
-    //                     query,
-    //                     responsesCount: responses.length
-    //                 }
-    //             });
-    //         }
-    //     }
-    //     return () => {
-    //         if (timerId !== null) {
-    //             clearTimeout(timerId);
-    //             emitSearchEvent();
-    //         }
-    //     };
-    // }, [queryParams.get('search')]);
-    const action = React.useMemo(() => {
-        const query = queryParams.get('search') ?? queryParams.get('query');
-        if (query?.length > 0) {
-            return {
-                action: 'Load',
-                args: {
-                    model: 'CatalogsWithExtra',
-                    args: {
-                        extra: [
-                            ['search', query]
-                        ]
-                    }
-                }
-            };
-        } else {
-            return {
-                action: 'Unload'
-            };
-        }
+    const [catalogs, setCatalogs] = React.useState([]);
+    const requestIdRef = React.useRef(0);
+    const query = React.useMemo(() => {
+        return queryParams.get('search') ?? queryParams.get('query') ?? '';
     }, [queryParams]);
-    const loadRange = React.useCallback((range) => {
-        core.transport.dispatch({
-            action: 'CatalogsWithExtra',
-            args: {
-                action: 'LoadRange',
-                args: range
+
+    React.useEffect(() => {
+        const normalizedQuery = query.trim();
+        if (!normalizedQuery) {
+            setCatalogs([]);
+            return;
+        }
+
+        const requestId = ++requestIdRef.current;
+        setCatalogs([]);
+
+        const fetchSearchResults = async () => {
+            try {
+                const response = await fetch(`${SEARCH_API_URL}/${encodeURIComponent(normalizedQuery)}`);
+                if (!response.ok) {
+                    throw new Error(`Search API failed with status ${response.status}`);
+                }
+
+                const payload = await response.json();
+                const items = Array.isArray(payload?.data?.items) ? payload.data.items : [];
+                const mappedItems = items.map((item) => ({
+                    id: item.subjectId,
+                    type: item.subjectType === 1 ? 'movie' : 'series',
+                    name: item.title,
+                    poster: item.cover?.url || '',
+                    posterShape: 'poster',
+                }));
+
+                if (requestId === requestIdRef.current) {
+                    setCatalogs([{
+                        id: 'api-search-results',
+                        type: 'other',
+                        name: 'Search Results',
+                        content: {
+                            type: 'Ready',
+                            content: mappedItems,
+                        }
+                    }]);
+                }
+            } catch (error) {
+                if (requestId === requestIdRef.current) {
+                    setCatalogs([]);
+                }
             }
-        }, 'search');
+        };
+
+        fetchSearchResults();
+    }, [query]);
+
+    const loadRange = React.useCallback(() => {
+        // No-op: external API returns the whole search set.
     }, []);
-    const search = useModelState({ model: 'search', action });
+
+    const search = React.useMemo(() => ({
+        selected: query.length > 0 ? { extra: [['search', query]] } : null,
+        catalogs,
+    }), [query, catalogs]);
+
     return [search, loadRange];
 };
 
