@@ -3,30 +3,77 @@
 const React = require('react');
 const PropTypes = require('prop-types');
 const classnames = require('classnames');
+const { decode } = require('blurhash');
 const { default: Button } = require('stremio/components/Button');
-const { default: Image } = require('stremio/components/Image');
 const { default: Icon } = require('@stremio/stremio-icons/react');
 const styles = require('./styles');
 
-const HomepageItem = React.memo(({ className, id, title, poster, type, rating, year, genre }) => {
+const BLURHASH_WIDTH = 32;
+const BLURHASH_HEIGHT = 48;
+
+const HomepageItem = React.memo(({ className, id, title, poster, blurHash, type, rating, year, genre }) => {
     const href = React.useMemo(() => {
         return `#/metadetails/${type}/${encodeURIComponent(id)}`;
     }, [type, id]);
+    const canvasRef = React.useRef(null);
+    const [imageLoaded, setImageLoaded] = React.useState(false);
+    const [imageError, setImageError] = React.useState(false);
 
     const renderPosterFallback = React.useCallback(() => (
         <Icon className={styles['placeholder-icon']} name={'movies'} />
     ), []);
 
+    React.useEffect(() => {
+        setImageLoaded(false);
+        setImageError(false);
+    }, [poster]);
+
+    React.useEffect(() => {
+        if (!blurHash || imageLoaded || imageError || !canvasRef.current) {
+            return;
+        }
+
+        try {
+            const pixels = decode(blurHash, BLURHASH_WIDTH, BLURHASH_HEIGHT);
+            const canvas = canvasRef.current;
+            canvas.width = BLURHASH_WIDTH;
+            canvas.height = BLURHASH_HEIGHT;
+            const context = canvas.getContext('2d');
+            const imageData = context.createImageData(BLURHASH_WIDTH, BLURHASH_HEIGHT);
+            imageData.data.set(pixels);
+            context.putImageData(imageData, 0, 0);
+        } catch (error) {
+            // Invalid blurhash should not break rendering.
+        }
+    }, [blurHash, imageLoaded, imageError]);
+
     return (
         <Button className={classnames(className, styles['homepage-item-container'])} title={title} href={href}>
             <div className={styles['poster-container']}>
                 <div className={styles['poster-image-layer']}>
-                    <Image
-                        className={styles['poster-image']}
-                        src={poster}
-                        alt={title || ' '}
-                        renderFallback={renderPosterFallback}
-                    />
+                    {
+                        blurHash && !imageLoaded && !imageError ?
+                            <canvas
+                                ref={canvasRef}
+                                className={styles['blurhash-canvas']}
+                                aria-hidden={'true'}
+                            />
+                            :
+                            null
+                    }
+                    {
+                        poster && !imageError ?
+                            <img
+                                className={classnames(styles['poster-image'], { [styles['loaded']]: imageLoaded })}
+                                src={poster}
+                                alt={title || ' '}
+                                loading={'lazy'}
+                                onLoad={() => setImageLoaded(true)}
+                                onError={() => setImageError(true)}
+                            />
+                            :
+                            renderPosterFallback()
+                    }
                 </div>
                 {
                     rating ?
@@ -62,6 +109,7 @@ HomepageItem.propTypes = {
     id: PropTypes.string,
     title: PropTypes.string,
     poster: PropTypes.string,
+    blurHash: PropTypes.string,
     type: PropTypes.string,
     rating: PropTypes.string,
     year: PropTypes.string,

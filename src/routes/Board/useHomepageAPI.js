@@ -41,6 +41,7 @@ const useHomepageAPI = () => {
                                 id: subject.subjectId,
                                 title: subject.title,
                                 poster: subject.cover?.url || '',
+                                blurHash: subject.cover?.blurHash || '',
                                 type: subject.subjectType === 1 ? 'movie' : 'series',
                                 genre: subject.genre || '',
                                 year: subject.releaseDate ? subject.releaseDate.split('-')[0] : '',
