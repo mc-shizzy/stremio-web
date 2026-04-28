@@ -1009,22 +1009,37 @@
 // RESPONSIVE — tablet (≤ 1300px)
 // ============================================================
 @media only screen and (max-width: @small) {
-    .hero { min-height: clamp(380px, 80vh, 620px); }
+    .hero { min-height: clamp(380px, 65vh, 580px); }
     .hero-content {
-        margin-top: clamp(200px, 44vh, 340px);
+        margin-top: clamp(180px, 38vh, 320px);
         padding: 0 1.5rem 2rem;
+        gap: 0.85rem;
     }
-    .hero-title { font-size: clamp(1.8rem, 5vw, 2.6rem); }
+    .hero-title { font-size: clamp(1.8rem, 4.5vw, 2.4rem); }
+    .hero-meta-line {
+        font-size: 0.85rem;
+    }
     .hero-actions {
         flex-wrap: wrap;
-        gap: 0.75rem;
+        gap: 0.65rem;
         justify-content: flex-start;
     }
-    .actions-primary { gap: 0.6rem; }
-    .actions-secondary { gap: 0.6rem; }
-    .btn-primary, .btn-outline { min-width: 9rem; }
+    .actions-primary { gap: 0.55rem; }
+    .actions-secondary { gap: 0.55rem; }
+    .btn-primary {
+        min-width: 10rem;
+        height: 2.85rem;
+        font-size: 0.9rem;
+    }
+    .btn-outline {
+        min-width: auto;
+        height: 2.65rem;
+        font-size: 0.85rem;
+        padding: 0 1rem;
+    }
     .tabs { gap: 1.5rem; }
     .episode-panel-header { flex-direction: row; align-items: center; }
+    .ep-card { flex-basis: 260px; }
 }
 
 // ============================================================
@@ -1034,106 +1049,192 @@
     .hero {
         min-height: auto;
         max-height: none;
-        padding-bottom: 1rem;
+        padding-bottom: 0;
     }
     .hero-backdrop-img {
         object-position: top center;
     }
     .hero-content {
-        margin-top: clamp(140px, 45vw, 220px);
-        padding: 0 1rem 1rem;
-        gap: 0.65rem;
+        margin-top: clamp(180px, 52vw, 280px);
+        padding: 0 1rem 1.25rem;
+        gap: 0.5rem;
     }
-    .hero-title {
-        font-size: clamp(1.35rem, 5.5vw, 1.8rem);
-        margin-bottom: 0.25rem;
-        line-height: 1.15;
-    }
-    .hero-meta-line {
-        font-size: 0.72rem;
-        gap: 0.25rem;
-        flex-wrap: wrap;
-        margin-bottom: 0.5rem;
 
-        > span + span::before {
-            margin: 0 0.5rem;
-        }
+    // chips row
+    .chips-row {
+        gap: 0.4rem;
+        margin-bottom: 0.25rem;
     }
     .type-chip {
-        font-size: 0.62rem;
-        padding: 0.2rem 0.55rem;
-        height: 1.6rem;
-        margin-bottom: 0.35rem;
+        font-size: 0.6rem;
+        padding: 0 0.5rem;
+        height: 1.4rem;
+        border-radius: 0.35rem;
+    }
+    .vf-badge {
+        height: 1.4rem;
+        padding: 0 0.5rem 0 0.35rem;
+        gap: 0.3rem;
+        border-radius: 0.35rem;
+    }
+    .vf-badge-text {
+        min-width: 1.2rem;
+        height: 1rem;
+        padding: 0 0.25rem;
+        font-size: 0.55rem;
+        border-radius: 0.2rem;
+    }
+    .vf-badge-label {
+        font-size: 0.58rem;
     }
 
-    // --- buttons: stack primary, row for secondary ---
+    .hero-title {
+        font-size: clamp(1.5rem, 6.5vw, 2rem);
+        margin-bottom: 0.15rem;
+        line-height: 1.1;
+        max-width: none;
+    }
+    .hero-meta-line {
+        font-size: 0.7rem;
+        gap: 0.2rem;
+        flex-wrap: wrap;
+        margin-bottom: 0.35rem;
+
+        > span + span::before {
+            margin: 0 0.4rem;
+        }
+    }
+    .hero-rating-icon {
+        width: 0.75rem !important;
+        height: 0.75rem !important;
+    }
+
+    // --- buttons: modern stacked layout ---
     .hero-actions {
         display: flex;
         flex-direction: column;
-        gap: 0.6rem;
+        gap: 0.5rem;
         width: 100%;
+        margin-top: 0.5rem;
     }
     .actions-primary {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.4rem;
         width: 100%;
     }
     .actions-secondary {
-        display: flex;
-        flex-direction: row;
-        gap: 0.5rem;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.4rem;
         width: 100%;
     }
     .btn-primary {
         width: 100%;
         min-width: 0;
-        height: 2.6rem;
-        font-size: 0.85rem;
-        padding: 0 1rem;
-        border-radius: 0.6rem;
-        gap: 0.4rem;
+        height: 2.75rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        padding: 0 1.25rem;
+        border-radius: 0.75rem;
+        gap: 0.5rem;
+
+        .btn-icon {
+            width: 1.1rem;
+            height: 1.1rem;
+        }
     }
     .btn-outline {
         flex: 1;
         min-width: 0;
-        height: 2.4rem;
-        font-size: 0.78rem;
-        padding: 0 0.6rem;
+        height: 2.35rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        padding: 0 0.75rem;
         border-radius: 0.6rem;
-        gap: 0.3rem;
+        gap: 0.35rem;
+        justify-content: center;
+
+        .btn-icon {
+            width: 0.9rem;
+            height: 0.9rem;
+        }
+
+        // hide text labels on very small screens, keep icons
+        span:not(.btn-icon) {
+            @media (max-width: 360px) {
+                display: none;
+            }
+        }
     }
 
     // --- content sections ---
     .content {
-        padding: 0 1rem 2rem;
-        gap: 1.5rem;
+        padding: 1rem 1rem 2.5rem;
+        gap: 1.75rem;
     }
     .section {
         margin-bottom: 0;
-        gap: 0.75rem;
+        gap: 0.65rem;
     }
-    .section-title { font-size: 0.95rem; margin-bottom: 0; }
+    .section-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0;
+    }
 
     .description {
-        font-size: 0.88rem;
-        line-height: 1.55;
-        -webkit-line-clamp: 3;
+        font-size: 0.85rem;
+        line-height: 1.6;
+        -webkit-line-clamp: 4;
+        color: @text-muted;
+    }
+    .more-toggle {
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
     }
 
     // --- cast rail ---
-    .cast-item { min-width: 70px; max-width: 80px; }
-    .cast-avatar-wrap { width: 56px; height: 56px; }
-    .cast-name { font-size: 0.68rem; }
-    .cast-char { font-size: 0.6rem; }
+    .rail-wrap {
+        margin: 0 -1rem;
+        padding: 0 1rem;
+    }
+    .rail {
+        gap: 0.85rem;
+    }
+    .cast-item {
+        flex: 0 0 72px;
+        min-width: 72px;
+        max-width: 72px;
+    }
+    .cast-avatar-wrap {
+        width: 52px;
+        height: 52px;
+        margin-bottom: 0.5rem;
+    }
+    .cast-name {
+        font-size: 0.68rem;
+        font-weight: 500;
+    }
+    .cast-char {
+        font-size: 0.58rem;
+    }
 
     // --- tabs ---
-    .tabs { gap: 1rem; border-bottom-width: 1px; }
-    .tab { font-size: 0.8rem; padding-bottom: 0.45rem; }
+    .tabs {
+        gap: 1.25rem;
+        border-bottom-width: 1px;
+        margin-bottom: 0.5rem;
+        padding-bottom: 0;
+    }
+    .tab {
+        font-size: 0.82rem;
+        padding: 0.35rem 0 0.65rem;
+    }
 
     // --- episode panel ---
     .episode-panel {
-        gap: 1rem;
+        gap: 0.85rem;
         overflow: visible;
     }
     .episode-panel-header {
@@ -1143,35 +1244,86 @@
         margin-bottom: 0;
         overflow: visible;
     }
-    .episode-panel-title { font-size: 0.9rem; }
+    .episode-panel-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
 
     // episode cards
     .episodes-rail {
-        gap: 0.75rem;
+        gap: 0.65rem;
         scroll-snap-type: x mandatory;
+        padding-bottom: 0.25rem;
     }
     .ep-card {
-        flex: 0 0 calc(85vw - 2rem);
+        flex: 0 0 calc(80vw - 1rem);
         scroll-snap-align: start;
         aspect-ratio: 16 / 9;
         height: auto;
+        border-radius: 0.75rem;
     }
-    .ep-card-watermark { font-size: 3.5rem; }
-    .ep-card-title { font-size: 0.78rem; }
-    .ep-card-tag { font-size: 0.65rem; }
-    .ep-card-body { padding: 0.85rem 1rem; }
+    .ep-card-watermark {
+        font-size: 3rem;
+        top: 0.25rem;
+        right: 0.75rem;
+    }
+    .ep-card-title {
+        font-size: 0.82rem;
+        font-weight: 600;
+    }
+    .ep-card-tag {
+        font-size: 0.62rem;
+        letter-spacing: 0.08em;
+    }
+    .ep-card-body {
+        padding: 0.75rem 0.85rem;
+        gap: 0.2rem;
+    }
+    .ep-card-play {
+        width: 2.8rem;
+        height: 2.8rem;
+
+        svg {
+            width: 1rem;
+            height: 1rem;
+        }
+    }
+    .ep-card-progress {
+        padding: 0.35rem 0.65rem 0.45rem;
+    }
+    .ep-card-progress-current {
+        font-size: 0.65rem;
+    }
 
     // similar rail
     .similar-rail {
-        gap: 0.65rem;
+        gap: 0.6rem;
         scroll-snap-type: x mandatory;
     }
     .similar-card {
-        flex: 0 0 calc(40vw - 0.5rem);
+        flex: 0 0 calc(38vw - 0.4rem);
         scroll-snap-align: start;
+        gap: 0.5rem;
     }
-    .similar-title { font-size: 0.78rem; }
-    .similar-meta { font-size: 0.68rem; }
+    .similar-poster {
+        border-radius: 0.6rem;
+    }
+    .similar-title {
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    .similar-meta {
+        font-size: 0.65rem;
+    }
+    .similar-play {
+        width: 2.4rem;
+        height: 2.4rem;
+
+        svg {
+            width: 0.9rem;
+            height: 0.9rem;
+        }
+    }
 
     // hide scroll arrows on mobile (swipe natively)
     .rail-arrow { display: none; }
@@ -1182,13 +1334,27 @@
         z-index: 200;
     }
     .season-trigger {
-        height: 2rem;
-        padding: 0 0.75rem;
-        font-size: 0.78rem;
+        height: 1.85rem;
+        padding: 0 0.65rem;
+        font-size: 0.75rem;
+        border-radius: 0.45rem;
+    }
+    .season-caret {
+        width: 0.75rem;
+        height: 0.75rem;
+    }
+    .season-menu {
+        min-width: 8rem;
     }
     .season-option {
-        padding: 0.45rem 0.7rem;
-        font-size: 0.8rem;
+        padding: 0.4rem 0.65rem;
+        font-size: 0.78rem;
+    }
+
+    // section similar
+    .section-similar {
+        margin-top: 0.25rem;
+        padding-top: 1.25rem;
     }
 }
 
@@ -1196,11 +1362,90 @@
 // RESPONSIVE — mobile landscape (≤ 1000px wide, landscape)
 // ============================================================
 @media @phone-landscape {
-    .hero { min-height: 70vw; max-height: 400px; }
-    .hero-content { margin-top: clamp(120px, 35vw, 200px); padding: 0 1.5rem 1.5rem; }
-    .hero-title { font-size: clamp(1.4rem, 4vw, 1.8rem); }
-    .actions-primary { gap: 0.5rem; }
-    .actions-secondary { gap: 0.5rem; }
-    .btn-primary, .btn-outline { height: 2.6rem; min-width: 8rem; font-size: 0.82rem; }
+    .hero { min-height: 55vw; max-height: 360px; }
+    .hero-content {
+        margin-top: clamp(100px, 28vw, 180px);
+        padding: 0 1.5rem 1.25rem;
+        gap: 0.5rem;
+    }
+    .hero-title { font-size: clamp(1.35rem, 3.5vw, 1.7rem); }
+    .hero-meta-line { font-size: 0.75rem; }
+    .chips-row { gap: 0.4rem; }
+    .type-chip {
+        height: 1.5rem;
+        font-size: 0.62rem;
+        padding: 0 0.55rem;
+    }
+    .vf-badge {
+        height: 1.5rem;
+        padding: 0 0.55rem 0 0.4rem;
+    }
+    .vf-badge-text {
+        height: 1.1rem;
+        min-width: 1.3rem;
+        font-size: 0.58rem;
+    }
+    .vf-badge-label { font-size: 0.62rem; }
+    .hero-actions {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    .actions-primary {
+        flex-direction: row;
+        gap: 0.45rem;
+    }
+    .actions-secondary {
+        flex-direction: row;
+        gap: 0.45rem;
+    }
+    .btn-primary {
+        height: 2.4rem;
+        min-width: 9rem;
+        font-size: 0.8rem;
+        padding: 0 1rem;
+    }
+    .btn-outline {
+        height: 2.25rem;
+        min-width: auto;
+        font-size: 0.75rem;
+        padding: 0 0.85rem;
+    }
     .rail-arrow { display: none; }
+    .content { padding: 0.75rem 1.5rem 2rem; gap: 1.25rem; }
+    .ep-card { flex: 0 0 220px; }
+    .similar-card { flex: 0 0 120px; }
+}
+
+// ============================================================
+// RESPONSIVE — very small screens (≤ 320px)
+// ============================================================
+@media only screen and (max-width: 320px) {
+    .hero-content {
+        padding: 0 0.75rem 1rem;
+    }
+    .hero-title {
+        font-size: 1.35rem;
+    }
+    .hero-meta-line {
+        font-size: 0.65rem;
+    }
+    .btn-primary {
+        height: 2.5rem;
+        font-size: 0.82rem;
+    }
+    .btn-outline {
+        height: 2.15rem;
+        font-size: 0.7rem;
+        padding: 0 0.5rem;
+    }
+    .content {
+        padding: 0.75rem 0.75rem 2rem;
+    }
+    .ep-card {
+        flex: 0 0 calc(88vw - 1rem);
+    }
+    .similar-card {
+        flex: 0 0 calc(42vw - 0.3rem);
+    }
 }
