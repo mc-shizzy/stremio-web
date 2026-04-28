@@ -10,6 +10,7 @@ const { getResumeTime } = require('stremio/common/customContinueWatching');
 const styles = require('./styles');
 
 const SEARCH_API_URL = 'https://apii.freehandyflix.online/api/search';
+const SOURCES_API_URL = 'https://apii.freehandyflix.online/api/sources';
 
 const formatTime = (seconds) => {
     if (typeof seconds !== 'number' || isNaN(seconds) || seconds < 0) return '00:00';
@@ -51,7 +52,6 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
     // ---- seasons & episodes ----------------------------------------------
     const allSeasons = React.useMemo(() => {
         if (!Array.isArray(meta?.videos)) {
-            console.log('[v0] allSeasons: meta.videos is not an array', meta?.videos);
             return [];
         }
         const set = new Set(
@@ -59,9 +59,7 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
                 .map((v) => v.season)
                 .filter((s) => typeof s === 'number' && s > 0)
         );
-        const result = Array.from(set).sort((a, b) => a - b);
-        console.log('[v0] allSeasons computed:', result, 'from videos count:', meta.videos.length);
-        return result;
+        return Array.from(set).sort((a, b) => a - b);
     }, [meta?.videos]);
 
     const [activeSeason, setActiveSeason] = React.useState(null);
@@ -141,6 +139,95 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
     }, [meta?.id, meta?.videos, isSeries, streamPath?.id]);
 
     const heroLabel = heroResumeTime > 0 ? 'Continue Watching' : 'Watch Now';
+    const [loadingEpisodeId, setLoadingEpisodeId] = React.useState(null);
+    const [moviePlayLoading, setMoviePlayLoading] = React.useState(false);
+
+    const openEpisodeInPlayer = React.useCallback(async (episode) => {
+        if (!meta?.id || !episode || typeof episode.season !== 'number' || typeof episode.episode !== 'number') {
+            return;
+        }
+        setLoadingEpisodeId(episode.id);
+        try {
+            const response = await fetch(`${SOURCES_API_URL}/${encodeURIComponent(meta.id)}?season=${episode.season}&episode=${episode.episode}`);
+            if (!response.ok) {
+                throw new Error(`Sources API failed with status ${response.status}`);
+            }
+            const payload = await response.json();
+            const processedSources = Array.isArray(payload?.data?.processedSources) ? payload.data.processedSources : [];
+            const firstSource = processedSources.find((source) => typeof (source.proxyUrl || source.directUrl) === 'string' && (source.proxyUrl || source.directUrl).length > 0);
+            if (!firstSource) {
+                return;
+            }
+            const streamUrl = firstSource.proxyUrl || firstSource.directUrl;
+            const encoded = await core.transport.encodeStream({ url: streamUrl });
+            if (typeof encoded !== 'string' || encoded.length === 0) {
+                return;
+            }
+            const params = new URLSearchParams({
+                customSubjectId: String(meta.id),
+                customType: 'series',
+                season: String(episode.season),
+                episode: String(episode.episode)
+            });
+            if (typeof firstSource.quality === 'number') {
+                params.set('quality', String(firstSource.quality));
+            }
+            const resumeTime = getResumeTime({
+                subjectId: String(meta.id),
+                type: 'series',
+                season: episode.season,
+                episode: episode.episode
+            });
+            if (resumeTime > 0) {
+                params.set('startTime', String(resumeTime));
+            }
+            window.location.replace(`#/player/${encodeURIComponent(encoded)}?${params.toString()}`);
+        } catch (_error) {
+            // ignore and leave user on current screen
+        } finally {
+            setLoadingEpisodeId((current) => (current === episode.id ? null : current));
+        }
+    }, [core, meta?.id]);
+
+    const openMovieInPlayer = React.useCallback(async () => {
+        if (!meta?.id) {
+            return;
+        }
+        setMoviePlayLoading(true);
+        try {
+            const response = await fetch(`${SOURCES_API_URL}/${encodeURIComponent(meta.id)}`);
+            if (!response.ok) {
+                throw new Error(`Sources API failed with status ${response.status}`);
+            }
+            const payload = await response.json();
+            const processedSources = Array.isArray(payload?.data?.processedSources) ? payload.data.processedSources : [];
+            const firstSource = processedSources.find((source) => typeof (source.proxyUrl || source.directUrl) === 'string' && (source.proxyUrl || source.directUrl).length > 0);
+            if (!firstSource) {
+                return;
+            }
+            const streamUrl = firstSource.proxyUrl || firstSource.directUrl;
+            const encoded = await core.transport.encodeStream({ url: streamUrl });
+            if (typeof encoded !== 'string' || encoded.length === 0) {
+                return;
+            }
+            const params = new URLSearchParams({
+                customSubjectId: String(meta.id),
+                customType: 'movie'
+            });
+            if (typeof firstSource.quality === 'number') {
+                params.set('quality', String(firstSource.quality));
+            }
+            const resumeTime = getResumeTime({ subjectId: String(meta.id), type: 'movie' });
+            if (resumeTime > 0) {
+                params.set('startTime', String(resumeTime));
+            }
+            window.location.replace(`#/player/${encodeURIComponent(encoded)}?${params.toString()}`);
+        } catch (_error) {
+            // ignore and leave user on current screen
+        } finally {
+            setMoviePlayLoading(false);
+        }
+    }, [core, meta?.id]);
 
     // ---- library / share / like ------------------------------------------
     const inLibrary = !!libraryItem && libraryItem.removed !== true;
@@ -345,6 +432,11 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
                                     <Icon className={styles['btn-icon']} name={'play'} />
                                     <span>{heroLabel}</span>
                                 </Button>
+                            ) : !isSeries ? (
+                                <Button className={styles['btn-primary']} onClick={openMovieInPlayer} disabled={moviePlayLoading}>
+                                    <Icon className={styles['btn-icon']} name={'play'} />
+                                    <span>{moviePlayLoading ? 'Loading...' : 'Watch Now'}</span>
+                                </Button>
                             ) : streamsLoading ? (
                                 <div className={classnames(styles['btn-primary'], styles['btn-loading'])}>
                                     <span className={styles['spinner']} aria-hidden="true" />
@@ -501,20 +593,28 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
                                                 className={classnames(styles['season-trigger'], { [styles['season-trigger-open']]: seasonOpen })}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    console.log('[v0] Season trigger clicked, allSeasons:', allSeasons, 'seasonOpen:', seasonOpen);
                                                     setSeasonOpen((v) => !v);
+                                                }}
+                                                onMouseDown={(e) => e.stopPropagation()}
+                                                onTouchStart={(e) => e.stopPropagation()}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Escape') {
+                                                        e.preventDefault();
+                                                        setSeasonOpen(false);
+                                                    }
                                                 }}
                                             >
                                                 <span>Season {activeSeason}</span>
                                                 <Icon className={styles['season-caret']} name={'caret-down'} />
                                             </button>
                                             {seasonOpen ? (
-                                                <div className={styles['season-menu']} role="listbox">
+                                                <div className={styles['season-menu']} role="listbox" onMouseDown={(e) => e.stopPropagation()} onTouchStart={(e) => e.stopPropagation()}>
                                                     {allSeasons.map((s) => (
                                                         <button
                                                             key={s}
                                                             type="button"
                                                             className={classnames(styles['season-option'], { [styles['season-option-active']]: s === activeSeason })}
+                                                            onMouseDown={(e) => e.preventDefault()}
                                                             onClick={() => { setActiveSeason(s); setSeasonOpen(false); }}
                                                         >
                                                             Season {s}
@@ -541,11 +641,13 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
                                                 ? Math.min(100, Math.max(2, (resumeTime / 3600) * 100))
                                                 : 0;
                                             return (
-                                                <a
+                                                <button
                                                     key={ep.id}
+                                                    type="button"
                                                     className={classnames(styles['ep-card'], { [styles['ep-card-current']]: isCurrent })}
-                                                    href={ep.deepLinks?.metaDetailsStreams || '#'}
                                                     title={ep.title || `Episode ${ep.episode}`}
+                                                    onClick={() => openEpisodeInPlayer(ep)}
+                                                    disabled={loadingEpisodeId === ep.id}
                                                 >
                                                     <div className={styles['ep-card-bg']} aria-hidden="true">
                                                         {backdropUrl ? <img src={backdropUrl} alt="" /> : null}
@@ -572,7 +674,7 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
                                                             </div>
                                                         </div>
                                                     ) : null}
-                                                </a>
+                                                </button>
                                             );
                                         })}
                                     </div>

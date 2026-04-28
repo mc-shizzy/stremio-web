@@ -240,7 +240,7 @@ const useMetaDetails = (urlParams) => {
                         const subtitles = normalizeSubtitles(sourcesPayload?.data?.captions);
                         const streamItems = await Promise.all(processedSources.map(async (source) => {
                             const streamUrl = source.proxyUrl || source.directUrl;
-                            let playerLink = source.directUrl || '';
+                            let playerLink = source.proxyUrl || source.directUrl || '';
                             const quality = typeof source.quality === 'number' ? source.quality : null;
                             if (typeof streamUrl === 'string' && streamUrl.length > 0) {
                                 try {
