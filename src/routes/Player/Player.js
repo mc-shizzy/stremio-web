@@ -28,6 +28,7 @@ const useVideo = require('./useVideo');
 const styles = require('./styles');
 const Video = require('./Video');
 const { default: Indicator } = require('./Indicator/Indicator');
+const { saveProgress, removeProgress } = require('stremio/common/customContinueWatching');
 
 const SOURCES_API_URL = 'https://apii.freehandyflix.online/api/sources';
 
@@ -126,6 +127,7 @@ const Player = ({ urlParams, queryParams }) => {
     const controlBarRef = React.useRef(null);
 
     const HOLD_DELAY = 200;
+    const lastSavedProgressRef = React.useRef(0);
     const customSubtitleTracks = React.useMemo(() => {
         return customPlaybackContext !== null ? customPlaybackOptions.subtitleTracks : [];
     }, [customPlaybackContext, customPlaybackOptions.subtitleTracks]);
@@ -173,6 +175,14 @@ const Player = ({ urlParams, queryParams }) => {
         }
 
         ended();
+        if (customPlaybackContext !== null) {
+            removeProgress({
+                subjectId: customPlaybackContext.subjectId,
+                type: customPlaybackContext.type,
+                season: customPlaybackContext.season,
+                episode: customPlaybackContext.episode
+            });
+        }
         if (window.playerNextVideo !== null) {
             nextVideo();
 
@@ -182,7 +192,7 @@ const Player = ({ urlParams, queryParams }) => {
         } else {
             window.history.back();
         }
-    }, []);
+    }, [customPlaybackContext]);
 
     const onError = React.useCallback((error) => {
         console.error('Player', error);
@@ -418,6 +428,9 @@ const Player = ({ urlParams, queryParams }) => {
                 params.set('episode', String(customPlaybackContext.episode));
             }
             params.set('quality', String(quality));
+            if (typeof video.state.time === 'number' && !isNaN(video.state.time) && video.state.time > 0) {
+                params.set('startTime', String(Math.floor(video.state.time)));
+            }
             window.location.replace(`#/player/${encodeURIComponent(encoded)}?${params.toString()}`);
         } catch (_error) {
             toast.show({
@@ -427,7 +440,7 @@ const Player = ({ urlParams, queryParams }) => {
                 timeout: 2500
             });
         }
-    }, [customPlaybackContext, customPlaybackOptions.qualityOptions, services.core, toast, t]);
+    }, [customPlaybackContext, customPlaybackOptions.qualityOptions, services.core, toast, t, video.state.time]);
 
     onFileDrop(CONSTANTS.SUPPORTED_LOCAL_SUBTITLES, async (filename, buffer) => {
         video.addLocalSubtitles(filename, buffer);
@@ -518,13 +531,19 @@ const Player = ({ urlParams, queryParams }) => {
                             []
                 },
                 autoplay: true,
-                time: player.libraryItem !== null &&
-                    player.selected.streamRequest !== null &&
-                    player.selected.streamRequest.path !== null &&
-                    player.libraryItem.state.video_id === player.selected.streamRequest.path.id ?
-                    player.libraryItem.state.timeOffset
+                time: customPlaybackContext !== null ?
+                    queryParams.has('startTime') && !isNaN(queryParams.get('startTime')) ?
+                        parseInt(queryParams.get('startTime'), 10)
+                        :
+                        0
                     :
-                    0,
+                    player.libraryItem !== null &&
+                        player.selected.streamRequest !== null &&
+                        player.selected.streamRequest.path !== null &&
+                        player.libraryItem.state.video_id === player.selected.streamRequest.path.id ?
+                        player.libraryItem.state.timeOffset
+                        :
+                        0,
                 forceTranscoding: forceTranscoding || casting,
                 maxAudioChannels: settings.surroundSound ? 32 : 2,
                 hardwareDecoding: settings.hardwareDecoding,
@@ -544,7 +563,7 @@ const Player = ({ urlParams, queryParams }) => {
                 shellTransport: services.shell.active ? services.shell.transport : null,
             });
         }
-    }, [streamingServer.baseUrl, player.selected, player.stream, forceTranscoding, casting]);
+    }, [streamingServer.baseUrl, player.selected, player.stream, forceTranscoding, casting, customPlaybackContext, queryParams]);
     React.useEffect(() => {
         if (video.state.stream !== null && customPlaybackContext !== null) {
             video.addExtraSubtitlesTracks(customSubtitleTracks);
@@ -562,6 +581,29 @@ const Player = ({ urlParams, queryParams }) => {
     React.useEffect(() => {
         !seeking && timeChanged(video.state.time, video.state.duration, video.state.manifest?.name);
     }, [video.state.time, video.state.duration, video.state.manifest, seeking]);
+
+    React.useEffect(() => {
+        if (customPlaybackContext === null || typeof video.state.time !== 'number' || typeof video.state.duration !== 'number') {
+            return;
+        }
+        const now = Date.now();
+        if (now - lastSavedProgressRef.current < 4000) {
+            return;
+        }
+        lastSavedProgressRef.current = now;
+        saveProgress({
+            subjectId: customPlaybackContext.subjectId,
+            type: customPlaybackContext.type,
+            season: customPlaybackContext.season,
+            episode: customPlaybackContext.episode,
+            title: player.title || player.metaItem?.content?.name || '',
+            poster: player.metaItem?.content?.logo || player.metaItem?.content?.background || '',
+            year: '',
+            genre: '',
+            time: video.state.time,
+            duration: video.state.duration
+        });
+    }, [customPlaybackContext, video.state.time, video.state.duration, player.title, player.metaItem]);
 
     React.useEffect(() => {
         if (playingOnExternalDevice.current && video.state.paused === false) {

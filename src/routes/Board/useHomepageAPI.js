@@ -1,6 +1,7 @@
 // Custom hook to fetch homepage data from external API
 
 const React = require('react');
+const { getContinueWatchingSection } = require('stremio/common/customContinueWatching');
 
 const API_URL = 'https://apii.freehandyflix.online/api/homepage';
 
@@ -51,7 +52,12 @@ const useHomepageAPI = () => {
                             })),
                         }));
 
-                    setSections(contentSections);
+                    const continueWatchingItems = getContinueWatchingSection();
+                    const nextSections = continueWatchingItems.length > 0 ?
+                        [{ title: 'Continue Watching', type: 'CONTINUE_WATCHING', position: -1, items: continueWatchingItems }, ...contentSections]
+                        :
+                        contentSections;
+                    setSections(nextSections);
                 } else {
                     setError('Failed to load homepage data');
                 }

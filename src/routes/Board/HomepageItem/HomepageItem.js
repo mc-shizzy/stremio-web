@@ -11,10 +11,13 @@ const styles = require('./styles');
 const BLURHASH_WIDTH = 32;
 const BLURHASH_HEIGHT = 48;
 
-const HomepageItem = React.memo(({ className, id, title, poster, blurHash, type, rating, year, genre }) => {
+const HomepageItem = React.memo(({ className, id, title, poster, blurHash, type, rating, year, genre, href: customHref }) => {
     const href = React.useMemo(() => {
-        return `#/metadetails/${type}/${encodeURIComponent(id)}`;
-    }, [type, id]);
+        return typeof customHref === 'string' && customHref.length > 0 ?
+            customHref
+            :
+            `#/metadetails/${type}/${encodeURIComponent(id)}`;
+    }, [customHref, type, id]);
     const canvasRef = React.useRef(null);
     const [imageLoaded, setImageLoaded] = React.useState(false);
     const [imageError, setImageError] = React.useState(false);
@@ -115,6 +118,7 @@ HomepageItem.propTypes = {
     year: PropTypes.string,
     genre: PropTypes.string,
     detailPath: PropTypes.string,
+    href: PropTypes.string,
 };
 
 module.exports = HomepageItem;

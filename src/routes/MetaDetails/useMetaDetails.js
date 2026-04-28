@@ -3,6 +3,7 @@
 const React = require('react');
 const { useModelState } = require('stremio/common');
 const { useServices } = require('stremio/services');
+const { getResumeTime } = require('stremio/common/customContinueWatching');
 
 const INFO_API_URL = 'https://apii.freehandyflix.online/api/info';
 const SOURCES_API_URL = 'https://apii.freehandyflix.online/api/sources';
@@ -246,6 +247,15 @@ const useMetaDetails = (urlParams) => {
                                         }
                                         if (quality !== null) {
                                             params.set('quality', String(quality));
+                                        }
+                                        const resumeTime = getResumeTime({
+                                            subjectId,
+                                            type,
+                                            season: streamQuery?.season ?? null,
+                                            episode: streamQuery?.episode ?? null
+                                        });
+                                        if (resumeTime > 0) {
+                                            params.set('startTime', String(resumeTime));
                                         }
                                         playerLink = `#/player/${encodeURIComponent(encoded)}?${params.toString()}`;
                                     }
