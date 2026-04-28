@@ -3,9 +3,13 @@
 @import (reference) '~@stremio/stremio-colors/less/stremio-colors.less';
 @import (reference) '~stremio/common/screen-sizes.less';
 
+@accent: #f5c518;
+
 .videos-list-container {
     display: flex;
     flex-direction: column;
+    gap: 0.75rem;
+    padding-top: 0.5rem;
 
     .message-container {
         flex: 1;
@@ -22,20 +26,23 @@
 
         .image {
             flex: none;
-            width: 10rem;
-            height: 10rem;
+            width: 9rem;
+            height: 9rem;
             max-width: 100%;
             margin-bottom: 1rem;
             object-fit: contain;
             object-position: center;
-            opacity: 0.9;
+            opacity: 0.7;
+            filter: grayscale(0.4);
         }
 
         .label {
             flex: none;
-            font-size: 1.4rem;
+            font-size: 0.95rem;
+            font-weight: 500;
             text-align: center;
-            color: var(--primary-foreground-color);
+            color: rgba(255, 255, 255, 0.55);
+            letter-spacing: 0.01em;
         }
     }
 
@@ -46,39 +53,53 @@
         align-items: center;
         justify-content: flex-start;
         gap: 1rem;
-        padding: 1.15rem 1.5rem 0.65rem;
-        color: @color-surface-light5-90;
+        padding: 0.85rem 1.5rem;
+        margin: 0 1rem;
+        color: rgba(255, 255, 255, 0.85);
         background: rgba(255, 255, 255, 0.04);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 0.85rem;
+        font-size: 0.85rem;
+        font-weight: 500;
     }
 
     .seasons-bar {
         flex: none;
         align-self: stretch;
-        margin: 1rem 1rem 0.75rem 1rem;
+        margin: 0;
     }
 
     .search-bar {
         flex: none;
         align-self: stretch;
-        margin: 0 1.5rem 1rem 1.5rem;
-        border-radius: 0.8rem;
-        background: rgba(255, 255, 255, 0.04);
+        margin: 0 1.25rem;
+        height: 2.6rem;
+        border-radius: 999rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        transition: border-color 0.2s ease, background-color 0.2s ease;
 
-        &:first-child {
-            margin-top: 1rem;
+        &:hover, &:focus-within {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(255, 255, 255, 0.16);
         }
     }
 
     .videos-container {
         flex: 1;
         align-self: stretch;
-        padding: 0 1rem;
+        padding: 0.25rem 1rem 1rem 1rem;
         overflow-y: auto;
-        scrollbar-color: @color-surface-light5-20 transparent;
+        scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+        scrollbar-width: thin;
+
+        &::-webkit-scrollbar {
+            width: 6px;
+        }
 
         &::-webkit-scrollbar-thumb {
-            background-color: @color-surface-light5-20;
+            background-color: rgba(255, 255, 255, 0.12);
+            border-radius: 999rem;
         }
 
         &::-webkit-scrollbar-track {
