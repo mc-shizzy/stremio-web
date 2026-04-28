@@ -54,16 +54,19 @@
         align-self: stretch;
     }
 
+    // Single scrollable column: meta panel first, then videos/streams list flowing below.
     .metadetails-content {
         flex: 1;
         align-self: stretch;
         position: relative;
         z-index: 0;
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
         margin-top: calc(var(--top-overlay-size) * -1);
         padding-top: var(--top-overlay-size);
         padding-bottom: var(--safe-area-inset-bottom, 0rem);
+        overflow-y: auto;
+        overflow-x: hidden;
 
         .meta-message-container {
             align-self: stretch;
@@ -73,7 +76,7 @@
             justify-content: center;
             padding: 2rem;
             width: 100%;
-            height: 100%;
+            min-height: 60vh;
 
             .image {
                 flex: none;
@@ -98,35 +101,38 @@
             }
         }
 
-        // Side panel (Streams or Videos list) — sleek glass, integrated edge
+        // Episodes / streams panel — now flows BELOW the meta panel as a full-width section.
         .videos-list, .streams-list {
-            flex: 0 0 27rem;
+            flex: 0 0 auto;
             align-self: stretch;
             position: relative;
-            background: linear-gradient(180deg, rgba(14, 17, 26, 0.94) 0%, rgba(8, 10, 16, 0.96) 100%);
-            border-left: 1px solid @border;
+            width: 100%;
+            max-width: 100%;
+            background: linear-gradient(180deg, rgba(14, 17, 26, 0.92) 0%, rgba(8, 10, 16, 0.96) 100%);
+            border-top: 1px solid @border;
+            border-left: 0;
             backdrop-filter: blur(28px) saturate(1.1);
             -webkit-backdrop-filter: blur(28px) saturate(1.1);
-            box-shadow: -28px 0 70px rgba(0, 0, 0, 0.55);
+            box-shadow: 0 -28px 70px rgba(0, 0, 0, 0.45);
 
-            // Soft edge highlight
+            // Top edge highlight glow
             &::before {
                 content: '';
                 position: absolute;
                 top: 0;
                 left: 0;
-                bottom: 0;
-                width: 1px;
-                background: linear-gradient(180deg, rgba(255, 255, 255, 0.0) 0%, rgba(255, 255, 255, 0.08) 18%, rgba(255, 255, 255, 0.04) 80%, rgba(255, 255, 255, 0.0) 100%);
+                right: 0;
+                height: 1px;
+                background: linear-gradient(90deg, rgba(255, 255, 255, 0.0) 0%, rgba(255, 255, 255, 0.10) 50%, rgba(255, 255, 255, 0.0) 100%);
                 pointer-events: none;
             }
         }
 
         .custom-meta-panel {
-            flex: 1;
+            flex: 0 0 auto;
             align-self: stretch;
+            width: 100%;
             min-width: 0;
-            min-height: 0;
         }
     }
 }
@@ -134,22 +140,12 @@
 @media only screen and (max-width: @minimum) {
     .metadetails-container {
         .metadetails-content {
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-
-            .videos-list, .streams-list {
-                flex: 0 0 auto;
-                border-left: 0;
-                border-top: 1px solid @border;
-                box-shadow: 0 -20px 50px rgba(0, 0, 0, 0.5);
-
-                &::before { display: none; }
+            .custom-meta-panel {
+                min-height: auto;
             }
 
-            .custom-meta-panel {
-                flex: 1;
-                min-height: 60vh;
+            .videos-list, .streams-list {
+                box-shadow: 0 -16px 40px rgba(0, 0, 0, 0.5);
             }
         }
     }

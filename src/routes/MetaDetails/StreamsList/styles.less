@@ -12,6 +12,11 @@
 .streams-list-container {
     display: flex;
     flex-direction: column;
+    width: 100%;
+    max-width: 60rem;
+    margin: 0 auto;
+    padding: 2.5rem clamp(1.25rem, 4vw, 4rem) 4rem;
+    box-sizing: border-box;
 
     .message-container {
         flex: 0 1 auto;
@@ -139,20 +144,13 @@
     }
 
     .streams-container {
-        flex: 1 1 auto;
+        flex: 0 0 auto;
         align-self: stretch;
         margin-top: 1rem;
-        padding: 0 1rem;
-        overflow-y: auto;
-        scrollbar-color: @color-surface-light5-20 transparent;
-
-        &::-webkit-scrollbar-thumb {
-            background-color: @color-surface-light5-20;
-        }
-
-        &::-webkit-scrollbar-track {
-            background-color: transparent;
-        }
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
     }
 
     .install-button-container {
