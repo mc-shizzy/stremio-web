@@ -490,17 +490,13 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
                                             <button
                                                 type="button"
                                                 className={classnames(styles['season-trigger'], { [styles['season-trigger-open']]: seasonOpen })}
-                                                onClick={() => {
-                                                    console.log('[v0] Season dropdown clicked, current seasonOpen:', seasonOpen, ', allSeasons:', allSeasons);
-                                                    setSeasonOpen((v) => !v);
-                                                }}
+                                                onClick={() => setSeasonOpen((v) => !v)}
                                             >
                                                 <span>Season {activeSeason}</span>
                                                 <Icon className={styles['season-caret']} name={'caret-down'} />
                                             </button>
                                             {seasonOpen ? (
-                                                <div className={styles['season-menu']} role="listbox" style={{ border: '2px solid red' }}>
-                                                    {console.log('[v0] Rendering season menu with seasons:', allSeasons)}
+                                                <div className={styles['season-menu']} role="listbox">
                                                     {allSeasons.map((s) => (
                                                         <button
                                                             key={s}

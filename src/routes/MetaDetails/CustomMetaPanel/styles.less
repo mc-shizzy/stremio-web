@@ -923,25 +923,158 @@
 }
 
 // ============================================================
-// RESPONSIVE
+// RESPONSIVE — tablet (≤ 1300px)
 // ============================================================
-@media only screen and (max-width: @medium) {
+@media only screen and (max-width: @small) {
     .hero { min-height: clamp(380px, 80vh, 620px); }
-    .hero-content { margin-top: clamp(180px, 40vh, 320px); }
-    .hero-actions { gap: 0.7rem; justify-content: flex-start; }
-    .actions-primary, .actions-secondary { width: 100%; gap: 0.6rem; }
-    .actions-primary > *, .actions-secondary > * {
-        flex: 1 1 calc(50% - 0.3rem);
-        min-width: 0;
-        padding: 0 0.85rem;
+    .hero-content {
+        margin-top: clamp(200px, 44vh, 340px);
+        padding: 0 1.5rem 2rem;
     }
-    .actions-primary, .actions-secondary { width: 100%; }
-    .btn-primary, .btn-outline { flex: 1 1 auto; }
+    .hero-title { font-size: clamp(1.8rem, 5vw, 2.6rem); }
+    .hero-actions {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        justify-content: flex-start;
+    }
+    .actions-primary { gap: 0.6rem; }
+    .actions-secondary { gap: 0.6rem; }
+    .btn-primary, .btn-outline { min-width: 9rem; }
+    .tabs { gap: 1.5rem; }
+    .episode-panel-header { flex-direction: row; align-items: center; }
 }
 
-@media only screen and (max-width: @small) {
-    .hero-title { font-size: clamp(1.6rem, 7vw, 2.4rem); }
-    .hero-content { padding-bottom: 1.5rem; }
-    .tabs { gap: 1.25rem; }
-    .episode-panel-header { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+// ============================================================
+// RESPONSIVE — mobile portrait (≤ 500px wide, portrait)
+// ============================================================
+@media @phone-portrait {
+    .hero {
+        min-height: 100vw;
+        max-height: 520px;
+    }
+    .hero-backdrop-img {
+        object-position: top center;
+    }
+    .hero-content {
+        margin-top: clamp(160px, 55vw, 260px);
+        padding: 0 1rem 1.5rem;
+    }
+    .hero-title {
+        font-size: clamp(1.45rem, 6.5vw, 2rem);
+        margin-bottom: 0.4rem;
+    }
+    .hero-meta-line {
+        font-size: 0.78rem;
+        gap: 0.35rem;
+        flex-wrap: wrap;
+        margin-bottom: 0.85rem;
+    }
+    .type-chip {
+        font-size: 0.65rem;
+        padding: 0.25rem 0.65rem;
+        margin-bottom: 0.5rem;
+    }
+
+    // --- buttons: 2-column grid on mobile ---
+    .hero-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.55rem;
+        width: 100%;
+    }
+    .actions-primary {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.55rem;
+        width: 100%;
+    }
+    .actions-secondary {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.55rem;
+        width: 100%;
+    }
+    // Watch Now spans full width on mobile (primary CTA)
+    .actions-primary > *:first-child {
+        grid-column: 1 / -1;
+    }
+    .btn-primary,
+    .btn-outline {
+        width: 100%;
+        min-width: 0;
+        height: 2.7rem;
+        font-size: 0.82rem;
+        padding: 0 0.5rem;
+        border-radius: 0.65rem;
+        gap: 0.35rem;
+    }
+
+    // --- content sections ---
+    .content {
+        padding: 0 1rem;
+    }
+    .section { margin-bottom: 2rem; }
+    .section-title { font-size: 1rem; margin-bottom: 0.75rem; }
+
+    // --- cast rail ---
+    .cast-item { min-width: 70px; max-width: 80px; }
+    .cast-avatar-wrap { width: 60px; height: 60px; }
+    .cast-name { font-size: 0.7rem; }
+    .cast-char { font-size: 0.62rem; }
+
+    // --- tabs ---
+    .tabs { gap: 1rem; border-bottom-width: 1px; }
+    .tab { font-size: 0.82rem; padding-bottom: 0.5rem; }
+
+    // --- episode panel ---
+    .episode-panel-header {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
+    }
+    .episode-panel-title { font-size: 0.95rem; }
+
+    // episode cards: show 1.3 cards, snap to each
+    .episodes-rail {
+        grid-auto-columns: calc(85vw - 2rem);
+        gap: 0.75rem;
+        scroll-snap-type: x mandatory;
+    }
+    .ep-card {
+        scroll-snap-align: start;
+        height: 120px;
+    }
+    .ep-card-watermark { font-size: 4.5rem; }
+    .ep-card-title { font-size: 0.82rem; }
+
+    // similar rail: show 2.3 cards
+    .similar-rail {
+        grid-auto-columns: calc(44vw - 1rem);
+        gap: 0.65rem;
+        scroll-snap-type: x mandatory;
+    }
+    .similar-card { scroll-snap-align: start; }
+    .similar-title { font-size: 0.8rem; }
+    .similar-meta { font-size: 0.7rem; }
+
+    // hide scroll arrows on mobile (swipe natively)
+    .rail-arrow { display: none; }
+
+    // season dropdown z-index extra insurance
+    .season-dropdown { position: relative; z-index: 200; }
+    .season-menu { z-index: 9999; }
+}
+
+// ============================================================
+// RESPONSIVE — mobile landscape (≤ 1000px wide, landscape)
+// ============================================================
+@media @phone-landscape {
+    .hero { min-height: 70vw; max-height: 400px; }
+    .hero-content { margin-top: clamp(120px, 35vw, 200px); padding: 0 1.5rem 1.5rem; }
+    .hero-title { font-size: clamp(1.4rem, 4vw, 1.8rem); }
+    .actions-primary { gap: 0.5rem; }
+    .actions-secondary { gap: 0.5rem; }
+    .btn-primary, .btn-outline { height: 2.6rem; min-width: 8rem; font-size: 0.82rem; }
+    .rail-arrow { display: none; }
 }
