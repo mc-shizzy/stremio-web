@@ -4,6 +4,9 @@ const React = require('react');
 const { useTranslate } = require('stremio/common');
 
 const mapSelectableInputs = (discover, t) => {
+    if (!discover?.selectable || discover.selectable.types.length === 0 || discover.selectable.catalogs.length === 0) {
+        return [[], discover?.selectable?.nextPage || null];
+    }
     const selectedType = discover.selectable.types.find(({ selected }) => selected);
     const typeSelect = {
         options: discover.selectable.types

@@ -9,6 +9,7 @@ const { Modal, useRouteFocused } = require('stremio-router');
 const { useServices } = require('stremio/services');
 const { useBinaryState } = require('stremio/common');
 const { Button, Image, Checkbox } = require('stremio/components');
+const { loginWithCredentials, registerWithCredentials } = require('stremio/common/customAuth');
 const CredentialsTextInput = require('./CredentialsTextInput');
 const PasswordResetModal = require('./PasswordResetModal');
 const useFacebookLogin = require('./useFacebookLogin');
@@ -136,7 +137,7 @@ const Intro = ({ queryParams }) => {
         stopAppleLogin();
         closeLoaderModal();
     }, []);
-    const loginWithEmail = React.useCallback(() => {
+    const loginWithEmail = React.useCallback(async () => {
         if (typeof state.email !== 'string' || state.email.length === 0 || !emailRef.current.validity.valid) {
             dispatch({ type: 'error', error: t('INVALID_EMAIL') });
             return;
@@ -146,18 +147,18 @@ const Intro = ({ queryParams }) => {
             return;
         }
         openLoaderModal();
-        core.transport.dispatch({
-            action: 'Ctx',
-            args: {
-                action: 'Authenticate',
-                args: {
-                    type: 'Login',
-                    email: state.email,
-                    password: state.password
-                }
-            }
-        });
-    }, [state.email, state.password]);
+        try {
+            await loginWithCredentials({
+                email: state.email,
+                password: state.password
+            });
+            closeLoaderModal();
+            window.location = '#/';
+        } catch (error) {
+            closeLoaderModal();
+            dispatch({ type: 'error', error: typeof error?.message === 'string' ? error.message : t('ERR_GENERIC') });
+        }
+    }, [state.email, state.password, t]);
     const loginAsGuest = React.useCallback(() => {
         if (!state.termsAccepted) {
             dispatch({ type: 'error', error: t('MUST_ACCEPT_TERMS') });
@@ -165,7 +166,7 @@ const Intro = ({ queryParams }) => {
         }
         window.location = '#/';
     }, [state.termsAccepted]);
-    const signup = React.useCallback(() => {
+    const signup = React.useCallback(async () => {
         if (typeof state.email !== 'string' || state.email.length === 0 || !emailRef.current.validity.valid) {
             dispatch({ type: 'error', error: t('INVALID_EMAIL') });
             return;
@@ -187,24 +188,18 @@ const Intro = ({ queryParams }) => {
             return;
         }
         openLoaderModal();
-        core.transport.dispatch({
-            action: 'Ctx',
-            args: {
-                action: 'Authenticate',
-                args: {
-                    type: 'Register',
-                    email: state.email,
-                    password: state.password,
-                    gdpr_consent: {
-                        tos: state.termsAccepted,
-                        privacy: state.privacyPolicyAccepted,
-                        marketing: state.marketingAccepted,
-                        from: 'web'
-                    }
-                }
-            }
-        });
-    }, [state.email, state.password, state.confirmPassword, state.termsAccepted, state.privacyPolicyAccepted, state.marketingAccepted]);
+        try {
+            await registerWithCredentials({
+                email: state.email,
+                password: state.password
+            });
+            closeLoaderModal();
+            window.location = '#/';
+        } catch (error) {
+            closeLoaderModal();
+            dispatch({ type: 'error', error: typeof error?.message === 'string' ? error.message : t('ERR_GENERIC') });
+        }
+    }, [state.email, state.password, state.confirmPassword, state.termsAccepted, state.privacyPolicyAccepted, state.marketingAccepted, t]);
     const emailOnChange = React.useCallback((event) => {
         dispatch({
             type: 'change-credentials',

@@ -8,6 +8,7 @@
     "scripts": {
         "start": "webpack serve --mode development",
         "start-prod": "webpack serve --mode production",
+        "start-auth": "node auth_server.js",
         "build": "webpack --mode production",
         "test": "jest",
         "lint": "eslint src",
@@ -25,6 +26,7 @@
         "bowser": "2.11.0",
         "buffer": "6.0.3",
         "classnames": "2.5.1",
+        "cors": "^2.8.5",
         "eventemitter3": "5.0.1",
         "fast-equals": "^6.0.0",
         "filter-invalid-dom-props": "3.0.1",
@@ -35,6 +37,7 @@
         "lodash.intersection": "4.4.0",
         "lodash.throttle": "4.1.1",
         "magnet-uri": "6.2.0",
+        "mongoose": "^8.19.2",
         "prop-types": "15.8.1",
         "react": "18.3.1",
         "react-dom": "18.3.1",
@@ -43,6 +46,8 @@
         "react-is": "18.3.1",
         "spatial-navigation-polyfill": "github:Stremio/spatial-navigation#64871b1422466f5f45d24ebc8bbd315b2ebab6a6",
         "stremio-translations": "github:Stremio/stremio-translations#90ea718c18750a0e9cd6824b0ef7c512a41cb90b",
+        "bcryptjs": "^2.4.3",
+        "jsonwebtoken": "^9.0.2",
         "url": "0.11.4",
         "use-long-press": "^3.2.0"
     },

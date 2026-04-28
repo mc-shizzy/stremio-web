@@ -125,11 +125,16 @@ const Discover = ({ urlParams, queryParams }) => {
                                 onSelect={onSelect}
                             />
                         ))}
-                        <div className={styles['filter-container']}>
-                            <Button className={styles['filter-button']} title={t('ALL_FILTERS')} onClick={openInputsModal}>
-                                <Icon className={styles['filter-icon']} name={'filters'} />
-                            </Button>
-                        </div>
+                        {
+                            selectInputs.length > 0 ?
+                                <div className={styles['filter-container']}>
+                                    <Button className={styles['filter-button']} title={t('ALL_FILTERS')} onClick={openInputsModal}>
+                                        <Icon className={styles['filter-icon']} name={'filters'} />
+                                    </Button>
+                                </div>
+                                :
+                                null
+                        }
                     </div>
                     {
                         discover.catalog !== null && !discover.catalog.installed ?
@@ -219,7 +224,7 @@ const Discover = ({ urlParams, queryParams }) => {
                 }
             </div>
             {
-                inputsModalOpen ?
+                inputsModalOpen && selectInputs.length > 0 ?
                     <ModalDialog title={t('CATALOG_FILTERS')} className={styles['selectable-inputs-modal']} onCloseRequest={closeInputsModal}>
                         {selectInputs.map(({ title, options, value, onSelect }, index) => (
                             <MultiselectMenu

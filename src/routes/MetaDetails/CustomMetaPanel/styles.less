@@ -4,6 +4,26 @@
 @import (reference) '~stremio/common/screen-sizes.less';
 
 .custom-meta-panel {
+    @keyframes fade-in-up {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fade-in-soft {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
     position: relative;
     flex: 1;
     display: flex;
@@ -26,16 +46,16 @@
             height: 100%;
             object-fit: cover;
             object-position: center top;
-            opacity: 0.28;
-            filter: blur(1px);
+            opacity: 0.3;
+            filter: blur(0.8px) saturate(1.05);
         }
 
         .backdrop-gradient {
             position: absolute;
             inset: 0;
             background:
-                linear-gradient(to right, rgba(5, 8, 14, 0.85) 0%, transparent 60%),
-                linear-gradient(to bottom, transparent 0%, rgba(5, 8, 14, 0.92) 75%, rgba(5, 8, 14, 1) 100%);
+                linear-gradient(to right, rgba(5, 8, 14, 0.9) 0%, rgba(5, 8, 14, 0.25) 60%, transparent 80%),
+                linear-gradient(to bottom, transparent 0%, rgba(5, 8, 14, 0.95) 74%, rgba(5, 8, 14, 1) 100%);
         }
     }
 
@@ -45,7 +65,7 @@
         flex: 1;
         overflow-y: auto;
         overflow-x: hidden;
-        padding: 2.5rem 3rem 3rem;
+        padding: 2.2rem 2.6rem 3rem;
         scrollbar-width: thin;
         scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
 
@@ -67,20 +87,21 @@
         display: flex;
         flex-direction: row;
         align-items: flex-start;
-        gap: 2.5rem;
-        padding-bottom: 2.5rem;
-        margin-bottom: 0.5rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        gap: 2.2rem;
+        padding: 0.4rem 0 2.2rem;
+        margin-bottom: 0.35rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+        animation: fade-in-up 300ms ease-out;
     }
 
     .poster-wrap {
         flex: none;
-        width: 12rem;
+        width: 11.2rem;
         aspect-ratio: 2 / 3;
-        border-radius: 1rem;
+        border-radius: 0.9rem;
         overflow: hidden;
         box-shadow:
-            0 20px 60px rgba(0, 0, 0, 0.65),
+            0 24px 70px rgba(0, 0, 0, 0.7),
             0 0 0 1px rgba(255, 255, 255, 0.08);
         background: rgba(255, 255, 255, 0.04);
 
@@ -89,6 +110,13 @@
             height: 100%;
             object-fit: cover;
             display: block;
+            transition: transform 0.4s ease;
+        }
+
+        &:hover {
+            .poster-img {
+                transform: scale(1.03);
+            }
         }
     }
 
@@ -102,13 +130,14 @@
     }
 
     .title {
-        font-size: 2.6rem;
+        font-size: 2.2rem;
         font-weight: 800;
         color: var(--primary-foreground-color);
-        line-height: 1.12;
+        line-height: 1.08;
         margin: 0;
         letter-spacing: -0.025em;
         text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+        animation: fade-in-soft 260ms ease-out;
     }
 
     .meta-row {
@@ -133,11 +162,11 @@
     }
 
     .meta-pill {
-        color: rgba(255, 255, 255, 0.6);
-        font-size: 0.85rem;
-        padding: 0.18rem 0.65rem;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.78rem;
+        padding: 0.2rem 0.62rem;
         border-radius: 2rem;
-        border: 1px solid rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.16);
         white-space: nowrap;
         flex-shrink: 0;
     }
@@ -147,7 +176,7 @@
         font-size: 0.72rem;
         font-weight: 600;
         letter-spacing: 0.06em;
-        color: rgba(255, 255, 255, 0.5);
+        color: rgba(255, 255, 255, 0.55);
     }
 
     .genre-row {
@@ -155,15 +184,16 @@
         flex-direction: row;
         flex-wrap: wrap;
         gap: 0.45rem;
+        animation: fade-in-soft 320ms ease-out;
     }
 
     .genre-tag {
-        font-size: 0.72rem;
+        font-size: 0.66rem;
         font-weight: 600;
         color: rgba(255, 255, 255, 0.75);
         background: rgba(255, 255, 255, 0.07);
         border: 1px solid rgba(255, 255, 255, 0.12);
-        padding: 0.18rem 0.65rem;
+        padding: 0.2rem 0.55rem;
         border-radius: 2rem;
         letter-spacing: 0.05em;
         text-transform: uppercase;
@@ -171,24 +201,26 @@
     }
 
     .description {
-        font-size: 0.95rem;
-        line-height: 1.72;
-        color: rgba(255, 255, 255, 0.68);
+        font-size: 0.92rem;
+        line-height: 1.74;
+        color: rgba(255, 255, 255, 0.72);
         margin: 0;
-        max-width: 58ch;
+        max-width: 62ch;
         display: -webkit-box;
         -webkit-line-clamp: 5;
         -webkit-box-orient: vertical;
         overflow: hidden;
+        animation: fade-in-soft 340ms ease-out;
     }
 
     .action-row {
         display: flex;
         flex-direction: row;
         align-items: center;
-        gap: 0.9rem;
+        gap: 0.75rem;
         flex-wrap: wrap;
-        padding-top: 0.25rem;
+        padding-top: 0.35rem;
+        animation: fade-in-soft 360ms ease-out;
     }
 
     .play-btn {
@@ -197,10 +229,10 @@
         gap: 0.55rem;
         background: #fff;
         color: #0a0a0a;
-        font-size: 1rem;
+        font-size: 0.94rem;
         font-weight: 700;
-        padding: 0.75rem 2rem;
-        border-radius: 0.6rem;
+        padding: 0.68rem 1.55rem;
+        border-radius: 0.55rem;
         cursor: pointer;
         transition: transform 0.14s ease, box-shadow 0.14s ease;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
@@ -208,8 +240,8 @@
         text-decoration: none;
 
         &:hover, &:focus {
-            transform: translateY(-2px) scale(1.02);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 34px rgba(0, 0, 0, 0.62);
         }
 
         &:active {
@@ -230,10 +262,10 @@
         background: rgba(255, 255, 255, 0.08);
         border: 1px solid rgba(255, 255, 255, 0.2);
         color: var(--primary-foreground-color);
-        font-size: 0.95rem;
+        font-size: 0.88rem;
         font-weight: 600;
-        padding: 0.72rem 1.6rem;
-        border-radius: 0.6rem;
+        padding: 0.66rem 1.2rem;
+        border-radius: 0.55rem;
         cursor: pointer;
         transition: background 0.14s ease, transform 0.14s ease, border-color 0.14s ease;
         backdrop-filter: blur(6px);
@@ -254,17 +286,18 @@
     }
 
     .section {
-        padding-top: 2.2rem;
+        padding-top: 1.6rem;
+        animation: fade-in-up 320ms ease-out;
     }
 
     .section-title {
-        font-size: 0.78rem;
+        font-size: 0.72rem;
         font-weight: 700;
         color: rgba(255, 255, 255, 0.5);
         letter-spacing: 0.1em;
         text-transform: uppercase;
-        margin-bottom: 1.1rem;
-        padding-bottom: 0.6rem;
+        margin-bottom: 0.95rem;
+        padding-bottom: 0.55rem;
         border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
 
@@ -272,7 +305,7 @@
     .cast-row {
         display: flex;
         flex-direction: row;
-        gap: 1rem;
+        gap: 0.75rem;
         overflow-x: auto;
         padding-bottom: 0.5rem;
         scrollbar-width: none;
@@ -284,17 +317,23 @@
 
     .cast-card {
         flex: none;
-        width: 5.2rem;
+        width: 4.75rem;
         display: flex;
         flex-direction: column;
         align-items: center;
         gap: 0.35rem;
         text-align: center;
+        transition: transform 0.14s ease, opacity 0.14s ease;
+
+        &:hover {
+            transform: translateY(-3px);
+            opacity: 0.98;
+        }
     }
 
     .cast-avatar-wrap {
-        width: 4.5rem;
-        height: 4.5rem;
+        width: 4rem;
+        height: 4rem;
         border-radius: 50%;
         overflow: hidden;
         border: 2px solid rgba(255, 255, 255, 0.1);
@@ -307,6 +346,11 @@
             object-fit: cover;
             object-position: top center;
             display: block;
+        }
+
+        &:hover {
+            border-color: rgba(255, 255, 255, 0.22);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
         }
     }
 
@@ -327,7 +371,7 @@
     }
 
     .cast-name {
-        font-size: 0.72rem;
+        font-size: 0.66rem;
         font-weight: 600;
         color: rgba(255, 255, 255, 0.85);
         line-height: 1.3;
@@ -338,7 +382,7 @@
     }
 
     .cast-char {
-        font-size: 0.64rem;
+        font-size: 0.58rem;
         color: rgba(255, 255, 255, 0.38);
         max-width: 100%;
         overflow: hidden;
@@ -351,7 +395,7 @@
     .similar-row {
         display: flex;
         flex-direction: row;
-        gap: 0.85rem;
+        gap: 0.65rem;
         overflow-x: auto;
         padding-bottom: 0.5rem;
         scrollbar-width: none;
@@ -363,7 +407,7 @@
 
     .similar-card {
         flex: none;
-        width: 7.5rem;
+        width: 6.4rem;
         display: flex;
         flex-direction: column;
         gap: 0.4rem;
@@ -372,8 +416,12 @@
         transition: transform 0.15s ease, opacity 0.15s ease;
 
         &:hover {
-            transform: translateY(-4px);
-            opacity: 0.95;
+            transform: translateY(-5px);
+            opacity: 1;
+        }
+
+        &:hover .similar-poster {
+            transform: scale(1.04);
         }
     }
 
@@ -391,6 +439,7 @@
             height: 100%;
             object-fit: cover;
             display: block;
+            transition: transform 0.35s ease;
         }
     }
 
@@ -425,7 +474,7 @@
     }
 
     .similar-title {
-        font-size: 0.74rem;
+        font-size: 0.67rem;
         font-weight: 500;
         color: rgba(255, 255, 255, 0.75);
         overflow: hidden;
@@ -435,7 +484,7 @@
     }
 
     .similar-year {
-        font-size: 0.66rem;
+        font-size: 0.6rem;
         color: rgba(255, 255, 255, 0.35);
         line-height: 1.2;
     }
@@ -447,36 +496,36 @@
     // ── Responsive ────────────────────────────────────────────────────────
     @media @phone-landscape {
         .scroll-area {
-            padding: 1.5rem 1.5rem 2rem;
+            padding: 1.35rem 1.3rem 2rem;
         }
 
         .poster-wrap {
-            width: 9rem;
+            width: 8.4rem;
         }
 
         .title {
-            font-size: 1.9rem;
+            font-size: 1.7rem;
         }
 
         .description {
-            -webkit-line-clamp: 4;
+            -webkit-line-clamp: 5;
         }
     }
 
     @media only screen and (max-width: @minimum) {
         .scroll-area {
-            padding: 1.2rem 1.2rem 2rem;
+            padding: 1rem 1rem 1.9rem;
         }
 
         .hero-section {
             flex-direction: column;
             align-items: center;
             text-align: center;
-            gap: 1.5rem;
+            gap: 1.15rem;
         }
 
         .poster-wrap {
-            width: 10rem;
+            width: 8.8rem;
         }
 
         .info-col {
@@ -493,7 +542,7 @@
         .description {
             text-align: left;
             max-width: 100%;
-            -webkit-line-clamp: 6;
+            -webkit-line-clamp: 7;
         }
     }
 }
