@@ -1,6 +1,7 @@
 // Copyright (C) 2017-2024 Smart code 203358507
 
 const React = require('react');
+const ReactDOM = require('react-dom');
 const PropTypes = require('prop-types');
 const classnames = require('classnames');
 const { useServices } = require('stremio/services');
@@ -355,20 +356,40 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
 // ---- season dropdown -------------------------------------------------
     const [seasonOpen, setSeasonOpen] = React.useState(false);
     const seasonDropdownRef = React.useRef(null);
+    const seasonTriggerRef = React.useRef(null);
+    const [menuPosition, setMenuPosition] = React.useState({ top: 0, right: 0 });
+
+    const updateMenuPosition = React.useCallback(() => {
+        if (seasonTriggerRef.current) {
+            const rect = seasonTriggerRef.current.getBoundingClientRect();
+            setMenuPosition({
+                top: rect.bottom + 6,
+                right: window.innerWidth - rect.right
+            });
+        }
+    }, []);
+
     React.useEffect(() => {
         if (!seasonOpen) return undefined;
+        updateMenuPosition();
         const onDocClick = (e) => {
-            if (seasonDropdownRef.current && !seasonDropdownRef.current.contains(e.target)) {
+            if (seasonDropdownRef.current && !seasonDropdownRef.current.contains(e.target) &&
+                seasonTriggerRef.current && !seasonTriggerRef.current.contains(e.target)) {
                 setSeasonOpen(false);
             }
         };
+        const onScroll = () => updateMenuPosition();
         document.addEventListener('mousedown', onDocClick);
         document.addEventListener('touchstart', onDocClick, { passive: true });
+        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', onScroll, { passive: true });
         return () => {
             document.removeEventListener('mousedown', onDocClick);
             document.removeEventListener('touchstart', onDocClick);
+            window.removeEventListener('scroll', onScroll);
+            window.removeEventListener('resize', onScroll);
         };
-    }, [seasonOpen]);
+    }, [seasonOpen, updateMenuPosition]);
 
     // ---- horizontal rail scroll helpers ----------------------------------
     const castRailRef = React.useRef(null);
@@ -568,6 +589,7 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
                                     {allSeasons.length > 1 ? (
                                         <div className={styles['season-dropdown']} ref={seasonDropdownRef}>
                                             <button
+                                                ref={seasonTriggerRef}
                                                 type="button"
                                                 className={classnames(styles['season-trigger'], { [styles['season-trigger-open']]: seasonOpen })}
                                                 onClick={(e) => {
@@ -586,8 +608,14 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
                                                 <span>Season {activeSeason}</span>
                                                 <Icon className={styles['season-caret']} name={'caret-down'} />
                                             </button>
-                                            {seasonOpen ? (
-                                                <div className={styles['season-menu']} role="listbox" onMouseDown={(e) => e.stopPropagation()} onTouchStart={(e) => e.stopPropagation()}>
+                                            {seasonOpen ? ReactDOM.createPortal(
+                                                <div
+                                                    className={styles['season-menu']}
+                                                    role="listbox"
+                                                    style={{ position: 'fixed', top: menuPosition.top, right: menuPosition.right }}
+                                                    onMouseDown={(e) => e.stopPropagation()}
+                                                    onTouchStart={(e) => e.stopPropagation()}
+                                                >
                                                     {allSeasons.map((s) => (
                                                         <button
                                                             key={s}
@@ -599,7 +627,8 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
                                                             Season {s}
                                                         </button>
                                                     ))}
-                                                </div>
+                                                </div>,
+                                                document.body
                                             ) : null}
                                         </div>
                                     ) : null}
