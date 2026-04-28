@@ -306,15 +306,6 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
         return () => { cancelled = true; };
     }, [core, trailerUrl]);
 
-    // ---- download --------------------------------------------------------
-    const downloadUrl = React.useMemo(() => {
-        if (!Array.isArray(streams)) return null;
-        const ready = streams.find((g) => g.content?.type === 'Ready');
-        if (!ready) return null;
-        const first = ready.content.content?.[0];
-        return first?.deepLinks?.externalPlayer?.download || null;
-    }, [streams]);
-
     // ---- similar fetch ---------------------------------------------------
     const [similar, setSimilar] = React.useState([]);
     const genreStr = customInfo?.genre || '';
@@ -462,18 +453,6 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
                         </div>
 
                         <div className={styles['actions-secondary']}>
-                            {downloadUrl ? (
-                                <Button
-                                    className={styles['btn-outline']}
-                                    href={downloadUrl}
-                                    target={'_blank'}
-                                    rel={'noopener noreferrer'}
-                                    title={'Download'}
-                                >
-                                    <Icon className={styles['btn-icon']} name={'download'} />
-                                    <span>Download</span>
-                                </Button>
-                            ) : null}
                             <Button
                                 className={classnames(styles['btn-outline'], { [styles['btn-success']]: shareState === 'copied' })}
                                 onClick={handleShare}
