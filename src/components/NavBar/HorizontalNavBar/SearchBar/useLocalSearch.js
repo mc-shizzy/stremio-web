@@ -38,7 +38,7 @@ const useLocalSearch = () => {
             if (requestId === requestIdRef.current) {
                 setItems(mappedItems);
             }
-        } catch (error) {
+        } catch (_error) {
             if (requestId === requestIdRef.current) {
                 setItems([]);
             }

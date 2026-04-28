@@ -77,6 +77,9 @@
         margin: 1em 1em 0 1em;
         gap: 0 0.5em;
         overflow: visible;
+        padding: 0.4rem;
+        border-radius: 0.9rem;
+        background: rgba(255, 255, 255, 0.04);
 
         .back-button-container {
             display: flex;
@@ -141,6 +144,15 @@
         margin-top: 1rem;
         padding: 0 1rem;
         overflow-y: auto;
+        scrollbar-color: @color-surface-light5-20 transparent;
+
+        &::-webkit-scrollbar-thumb {
+            background-color: @color-surface-light5-20;
+        }
+
+        &::-webkit-scrollbar-track {
+            background-color: transparent;
+        }
     }
 
     .install-button-container {
@@ -150,7 +162,7 @@
         flex-direction: row;
         align-items: center;
         justify-content: center;
-        background-color: var(--secondary-accent-color);
+        background: linear-gradient(135deg, var(--secondary-accent-color), rgba(114, 63, 255, 0.75));
         height: 4rem;
         padding: 0 2rem;
         margin: 1rem auto;

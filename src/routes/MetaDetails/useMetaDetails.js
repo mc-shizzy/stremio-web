@@ -38,6 +38,38 @@ const map = (metaDetails) => ({
         metaDetails.metaItem
 });
 
+const API_TRANSPORT_URL = 'https://apii.freehandyflix.online';
+
+const parseSeriesVideoId = (videoId) => {
+    if (typeof videoId !== 'string') {
+        return null;
+    }
+    const parts = videoId.split(':');
+    if (parts.length < 3) {
+        return null;
+    }
+    const season = parseInt(parts[1], 10);
+    const episode = parseInt(parts[2], 10);
+    return !isNaN(season) && !isNaN(episode) ? { season, episode } : null;
+};
+
+const normalizeSubtitles = (captions) => {
+    if (!Array.isArray(captions)) {
+        return [];
+    }
+    return captions
+        .filter((caption) => typeof caption?.url === 'string' && caption.url.length > 0)
+        .map((caption, index) => ({
+            id: `api-sub-${index}-${caption.url}`,
+            lang: caption.lan || caption.lang || 'eng',
+            label: caption.label || caption.name || caption.lan || caption.lang || 'Subtitle',
+            origin: 'EXCLUSIVE',
+            embedded: false,
+            url: caption.url,
+            fallbackUrl: caption.url
+        }));
+};
+
 const useMetaDetails = (urlParams) => {
     const { core } = useServices();
     const isCustomSubjectId = React.useMemo(() => /^\d+$/.test(urlParams?.id || ''), [urlParams?.id]);
@@ -126,19 +158,6 @@ const useMetaDetails = (urlParams) => {
             isCustomApi: true
         });
 
-        const parseSeriesVideoId = (videoId) => {
-            if (typeof videoId !== 'string') {
-                return null;
-            }
-            const parts = videoId.split(':');
-            if (parts.length < 3) {
-                return null;
-            }
-            const season = parseInt(parts[1], 10);
-            const episode = parseInt(parts[2], 10);
-            return !isNaN(season) && !isNaN(episode) ? { season, episode } : null;
-        };
-
         const fetchCustomMetaDetails = async () => {
             try {
                 const infoResponse = await fetch(`${INFO_API_URL}/${encodeURIComponent(subjectId)}`);
@@ -208,16 +227,29 @@ const useMetaDetails = (urlParams) => {
                     if (sourcesResponse.ok) {
                         const sourcesPayload = await sourcesResponse.json();
                         const processedSources = Array.isArray(sourcesPayload?.data?.processedSources) ? sourcesPayload.data.processedSources : [];
+                        const subtitles = normalizeSubtitles(sourcesPayload?.data?.captions);
                         const streamItems = await Promise.all(processedSources.map(async (source) => {
                             const streamUrl = source.proxyUrl || source.directUrl;
                             let playerLink = source.directUrl || '';
+                            const quality = typeof source.quality === 'number' ? source.quality : null;
                             if (typeof streamUrl === 'string' && streamUrl.length > 0) {
                                 try {
                                     const encoded = await core.transport.encodeStream({ url: streamUrl });
                                     if (typeof encoded === 'string') {
-                                        playerLink = `#/player/${encodeURIComponent(encoded)}`;
+                                        const params = new URLSearchParams({
+                                            customSubjectId: subjectId,
+                                            customType: type
+                                        });
+                                        if (streamQuery) {
+                                            params.set('season', String(streamQuery.season));
+                                            params.set('episode', String(streamQuery.episode));
+                                        }
+                                        if (quality !== null) {
+                                            params.set('quality', String(quality));
+                                        }
+                                        playerLink = `#/player/${encodeURIComponent(encoded)}?${params.toString()}`;
                                     }
-                                } catch (error) {
+                                } catch (_error) {
                                     // Fallback to direct URL if encoding fails.
                                 }
                             }
@@ -227,11 +259,17 @@ const useMetaDetails = (urlParams) => {
                                 description: sizeInMb ? `${sizeInMb} MB` : 'Stream',
                                 thumbnail: subject.cover?.url || '',
                                 progress: 0,
+                                subtitles,
                                 deepLinks: {
                                     player: playerLink,
                                     externalPlayer: {
                                         streaming: source.directUrl || '',
-                                        download: source.proxyUrl || source.directUrl || ''
+                                        download: source.proxyUrl || source.directUrl || '',
+                                        qualityVariants: processedSources.map((variantSource) => ({
+                                            quality: variantSource.quality,
+                                            format: variantSource.format,
+                                            streamUrl: variantSource.proxyUrl || variantSource.directUrl || ''
+                                        })),
                                     }
                                 }
                             };
@@ -239,7 +277,7 @@ const useMetaDetails = (urlParams) => {
 
                         streams = [{
                             addon: {
-                                transportUrl: 'https://apii.freehandyflix.online',
+                                transportUrl: API_TRANSPORT_URL,
                                 manifest: {
                                     name: 'Freehandyflix'
                                 }
@@ -263,7 +301,7 @@ const useMetaDetails = (urlParams) => {
                         isCustomApi: true
                     });
                 }
-            } catch (error) {
+            } catch (_error) {
                 if (!cancelled) {
                     setCustomMetaDetails({
                         selected,

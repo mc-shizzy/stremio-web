@@ -52,7 +52,7 @@ const useSearch = (queryParams) => {
                         }
                     }]);
                 }
-            } catch (error) {
+            } catch (_error) {
                 if (requestId === requestIdRef.current) {
                     setCatalogs([]);
                 }

@@ -29,6 +29,8 @@ const styles = require('./styles');
 const Video = require('./Video');
 const { default: Indicator } = require('./Indicator/Indicator');
 
+const SOURCES_API_URL = 'https://apii.freehandyflix.online/api/sources';
+
 const findTrackByLang = (tracks, lang) => tracks.find((track) => track.lang === lang || langs.where('1', track.lang)?.[2] === lang);
 const findTrackById = (tracks, id) => tracks.find((track) => track.id === id);
 
@@ -94,6 +96,27 @@ const Player = ({ urlParams, queryParams }) => {
     const defaultAudioTrackSelected = React.useRef(false);
     const playingOnExternalDevice = React.useRef(false);
     const [error, setError] = React.useState(null);
+    const [customPlaybackOptions, setCustomPlaybackOptions] = React.useState({
+        qualityOptions: [],
+        subtitleTracks: []
+    });
+    const customPlaybackContext = React.useMemo(() => {
+        if (!queryParams.has('customSubjectId')) {
+            return null;
+        }
+        const subjectId = queryParams.get('customSubjectId');
+        const type = queryParams.get('customType') || urlParams.type || 'movie';
+        const season = queryParams.has('season') ? parseInt(queryParams.get('season'), 10) : null;
+        const episode = queryParams.has('episode') ? parseInt(queryParams.get('episode'), 10) : null;
+        const quality = queryParams.has('quality') ? parseInt(queryParams.get('quality'), 10) : null;
+        return {
+            subjectId,
+            type,
+            season: !isNaN(season) ? season : null,
+            episode: !isNaN(episode) ? episode : null,
+            quality: !isNaN(quality) ? quality : null
+        };
+    }, [queryParams, urlParams.type]);
 
     const isNavigating = React.useRef(false);
 
@@ -103,6 +126,12 @@ const Player = ({ urlParams, queryParams }) => {
     const controlBarRef = React.useRef(null);
 
     const HOLD_DELAY = 200;
+    const customSubtitleTracks = React.useMemo(() => {
+        return customPlaybackContext !== null ? customPlaybackOptions.subtitleTracks : [];
+    }, [customPlaybackContext, customPlaybackOptions.subtitleTracks]);
+    const selectedQuality = React.useMemo(() => {
+        return customPlaybackContext?.quality ?? null;
+    }, [customPlaybackContext]);
 
     const onImplementationChanged = React.useCallback(() => {
         video.setSubtitlesSize(settings.subtitlesSize);
@@ -362,10 +391,112 @@ const Player = ({ urlParams, queryParams }) => {
     const onBarMouseMove = React.useCallback((event) => {
         event.nativeEvent.immersePrevented = true;
     }, []);
+    const onQualitySelected = React.useCallback(async (qualityValue) => {
+        if (customPlaybackContext === null) {
+            return;
+        }
+        const quality = parseInt(qualityValue, 10);
+        if (isNaN(quality)) {
+            return;
+        }
+        const selectedVariant = customPlaybackOptions.qualityOptions.find((variant) => variant.quality === quality);
+        if (!selectedVariant || typeof selectedVariant.streamUrl !== 'string' || selectedVariant.streamUrl.length === 0) {
+            return;
+        }
+        try {
+            const encoded = await services.core.transport.encodeStream({ url: selectedVariant.streamUrl });
+            if (typeof encoded !== 'string') {
+                return;
+            }
+            const params = new URLSearchParams();
+            params.set('customSubjectId', customPlaybackContext.subjectId);
+            params.set('customType', customPlaybackContext.type);
+            if (typeof customPlaybackContext.season === 'number') {
+                params.set('season', String(customPlaybackContext.season));
+            }
+            if (typeof customPlaybackContext.episode === 'number') {
+                params.set('episode', String(customPlaybackContext.episode));
+            }
+            params.set('quality', String(quality));
+            window.location.replace(`#/player/${encodeURIComponent(encoded)}?${params.toString()}`);
+        } catch (_error) {
+            toast.show({
+                type: 'error',
+                title: t('ERROR'),
+                message: 'Failed to switch quality',
+                timeout: 2500
+            });
+        }
+    }, [customPlaybackContext, customPlaybackOptions.qualityOptions, services.core, toast, t]);
 
     onFileDrop(CONSTANTS.SUPPORTED_LOCAL_SUBTITLES, async (filename, buffer) => {
         video.addLocalSubtitles(filename, buffer);
     });
+
+    React.useEffect(() => {
+        if (customPlaybackContext === null) {
+            setCustomPlaybackOptions({
+                qualityOptions: [],
+                subtitleTracks: []
+            });
+            return;
+        }
+
+        let cancelled = false;
+        const query = customPlaybackContext.type === 'series' && customPlaybackContext.season !== null && customPlaybackContext.episode !== null ?
+            `?season=${customPlaybackContext.season}&episode=${customPlaybackContext.episode}` :
+            '';
+
+        const fetchPlaybackOptions = async () => {
+            try {
+                const response = await fetch(`${SOURCES_API_URL}/${encodeURIComponent(customPlaybackContext.subjectId)}${query}`);
+                if (!response.ok) {
+                    throw new Error(`Sources API failed with status ${response.status}`);
+                }
+                const payload = await response.json();
+                const processedSources = Array.isArray(payload?.data?.processedSources) ? payload.data.processedSources : [];
+                const qualityOptions = processedSources
+                    .map((source) => ({
+                        quality: typeof source.quality === 'number' ? source.quality : parseInt(source.quality, 10),
+                        format: source.format || '',
+                        streamUrl: source.proxyUrl || source.directUrl || ''
+                    }))
+                    .filter((source) => !isNaN(source.quality) && source.streamUrl.length > 0);
+                const subtitles = Array.isArray(payload?.data?.captions) ?
+                    payload.data.captions
+                        .filter((caption) => typeof caption?.url === 'string' && caption.url.length > 0)
+                        .map((caption, index) => ({
+                            id: `api-player-sub-${index}-${caption.url}`,
+                            lang: caption.lan || caption.lang || 'eng',
+                            label: caption.label || caption.name || caption.lan || caption.lang || 'Subtitle',
+                            origin: 'EXCLUSIVE',
+                            embedded: false,
+                            url: caption.url,
+                            fallbackUrl: caption.url
+                        }))
+                    :
+                    [];
+                if (!cancelled) {
+                    setCustomPlaybackOptions({
+                        qualityOptions,
+                        subtitleTracks: subtitles
+                    });
+                }
+            } catch (_error) {
+                if (!cancelled) {
+                    setCustomPlaybackOptions({
+                        qualityOptions: [],
+                        subtitleTracks: []
+                    });
+                }
+            }
+        };
+
+        fetchPlaybackOptions();
+        return () => {
+            cancelled = true;
+        };
+    }, [customPlaybackContext]);
 
     React.useEffect(() => {
         setError(null);
@@ -375,13 +506,16 @@ const Player = ({ urlParams, queryParams }) => {
             video.load({
                 stream: {
                     ...player.stream.content,
-                    subtitles: Array.isArray(player.selected.stream.subtitles) ?
-                        player.selected.stream.subtitles.map((subtitles) => ({
-                            ...subtitles,
-                            label: subtitles.label || subtitles.url
-                        }))
+                    subtitles: customPlaybackContext !== null ?
+                        customSubtitleTracks
                         :
-                        []
+                        Array.isArray(player.selected.stream.subtitles) ?
+                            player.selected.stream.subtitles.map((subtitles) => ({
+                                ...subtitles,
+                                label: subtitles.label || subtitles.url
+                            }))
+                            :
+                            []
                 },
                 autoplay: true,
                 time: player.libraryItem !== null &&
@@ -412,6 +546,10 @@ const Player = ({ urlParams, queryParams }) => {
         }
     }, [streamingServer.baseUrl, player.selected, player.stream, forceTranscoding, casting]);
     React.useEffect(() => {
+        if (video.state.stream !== null && customPlaybackContext !== null) {
+            video.addExtraSubtitlesTracks(customSubtitleTracks);
+            return;
+        }
         if (video.state.stream !== null) {
             const tracks = player.subtitles.map((subtitles) => ({
                 ...subtitles,
@@ -419,7 +557,7 @@ const Player = ({ urlParams, queryParams }) => {
             }));
             video.addExtraSubtitlesTracks(tracks);
         }
-    }, [player.subtitles, video.state.stream]);
+    }, [player.subtitles, video.state.stream, customPlaybackContext, customSubtitleTracks]);
 
     React.useEffect(() => {
         !seeking && timeChanged(video.state.time, video.state.duration, video.state.manifest?.name);
@@ -937,6 +1075,9 @@ const Player = ({ urlParams, queryParams }) => {
                     playbackDevices={playbackDevices}
                     extraSubtitlesTracks={video.state.extraSubtitlesTracks}
                     selectedExtraSubtitlesTrackId={video.state.selectedExtraSubtitlesTrackId}
+                    qualityOptions={customPlaybackOptions.qualityOptions}
+                    selectedQuality={selectedQuality}
+                    onQualitySelected={onQualitySelected}
                 />
             </ContextMenu>
             <HorizontalNavBar
@@ -1066,6 +1207,9 @@ const Player = ({ urlParams, queryParams }) => {
                     playbackDevices={playbackDevices}
                     extraSubtitlesTracks={video.state.extraSubtitlesTracks}
                     selectedExtraSubtitlesTrackId={video.state.selectedExtraSubtitlesTrackId}
+                    qualityOptions={customPlaybackOptions.qualityOptions}
+                    selectedQuality={selectedQuality}
+                    onQualitySelected={onQualitySelected}
                 />
             </Transition>
         </div>

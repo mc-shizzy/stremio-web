@@ -9,7 +9,7 @@ const { useServices } = require('stremio/services');
 const Option = require('./Option');
 const styles = require('./styles');
 
-const OptionsMenu = React.memo(React.forwardRef(({ className, stream, playbackDevices, extraSubtitlesTracks, selectedExtraSubtitlesTrackId }, ref) => {
+const OptionsMenu = React.memo(React.forwardRef(({ className, stream, playbackDevices, extraSubtitlesTracks, selectedExtraSubtitlesTrackId, qualityOptions, selectedQuality, onQualitySelected }, ref) => {
     const { t } = useTranslation();
     const { core } = useServices();
     const platform = usePlatform();
@@ -106,9 +106,27 @@ const OptionsMenu = React.memo(React.forwardRef(({ className, stream, playbackDe
     const onMouseDown = React.useCallback((event) => {
         event.nativeEvent.optionsMenuClosePrevented = true;
     }, []);
+    const qualityOptionsSorted = React.useMemo(() => {
+        if (!Array.isArray(qualityOptions)) {
+            return [];
+        }
+        return [...qualityOptions].sort((left, right) => (right.quality || 0) - (left.quality || 0));
+    }, [qualityOptions]);
 
     return (
         <div ref={ref} className={classnames(className, styles['options-menu-container'])} onMouseDown={onMouseDown}>
+            {
+                qualityOptionsSorted.map((qualityOption) => (
+                    <Option
+                        key={`${qualityOption.quality}-${qualityOption.format || ''}`}
+                        icon={'speed'}
+                        label={`${qualityOption.quality}p${qualityOption.format ? ` (${String(qualityOption.format).toUpperCase()})` : ''}${selectedQuality === qualityOption.quality ? ' • current' : ''}`}
+                        deviceId={String(qualityOption.quality)}
+                        disabled={stream === null}
+                        onClick={onQualitySelected}
+                    />
+                ))
+            }
             {
                 streamingUrl || downloadUrl ?
                     <Option
@@ -175,6 +193,9 @@ OptionsMenu.propTypes = {
     playbackDevices: PropTypes.array,
     extraSubtitlesTracks: PropTypes.array,
     selectedExtraSubtitlesTrackId: PropTypes.string,
+    qualityOptions: PropTypes.array,
+    selectedQuality: PropTypes.number,
+    onQualitySelected: PropTypes.func,
 };
 
 module.exports = OptionsMenu;

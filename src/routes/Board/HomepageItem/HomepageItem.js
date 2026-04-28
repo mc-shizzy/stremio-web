@@ -42,7 +42,7 @@ const HomepageItem = React.memo(({ className, id, title, poster, blurHash, type,
             const imageData = context.createImageData(BLURHASH_WIDTH, BLURHASH_HEIGHT);
             imageData.data.set(pixels);
             context.putImageData(imageData, 0, 0);
-        } catch (error) {
+        } catch (_error) {
             // Invalid blurhash should not break rendering.
         }
     }, [blurHash, imageLoaded, imageError]);

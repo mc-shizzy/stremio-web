@@ -80,6 +80,7 @@
             height: 9rem;
             object-fit: contain;
             object-position: center;
+            filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.45));
         }
 
         .logo-placeholder {
@@ -97,9 +98,10 @@
             .runtime-label, .release-info-label {
                 flex: 0 1 auto;
                 margin-right: 3rem;
-                font-size: 1.25rem;
+                font-size: 1.15rem;
                 font-weight: 600;
                 color: var(--primary-foreground-color);
+                opacity: 0.9;
             }
 
             .imdb-button-container {
@@ -134,17 +136,19 @@
         }
 
         .description-container {
-            margin-top: 1rem;
-            font-size: 1rem;
+            margin-top: 1.2rem;
+            font-size: 1.04rem;
             font-weight: 400;
-            line-height: 2em;
+            line-height: 1.75em;
             color: var(--primary-foreground-color);
+            opacity: 0.92;
             .label-container {
                 text-transform: uppercase;
                 font-size: 0.95rem;
                 font-weight: 700;
                 color: var(--primary-foreground-color);
-                opacity: 0.3;
+                opacity: 0.5;
+                letter-spacing: 0.08em;
             }
         }
 
@@ -160,7 +164,7 @@
         flex-direction: row;
         align-items: flex-end;
         flex-wrap: wrap;
-        padding-top: 3.5rem;
+        padding-top: 2.5rem;
         overflow: visible;
 
         .label {
@@ -189,6 +193,7 @@
             width: 4rem;
             height: 4rem;
             margin-bottom: 1rem;
+            transition: transform 0.16s ease, box-shadow 0.16s ease;
 
             &:global(.wide) {
                 width: auto;
@@ -205,6 +210,11 @@
                     background-color: var( --secondary-accent-color);
                     outline: none;
                 }
+            }
+
+            &:hover, &:focus {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
             }
         }
     
