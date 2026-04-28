@@ -102,6 +102,7 @@ const MetaDetails = ({ urlParams, queryParams }) => {
                     streams={metaDetails.streams}
                     type={urlParams.type}
                     streamPath={streamPath}
+                    libraryItem={metaDetails.libraryItem}
                 />
                 {
                     streamPath !== null ?
