@@ -1,16 +1,8 @@
 // Copyright (C) 2017-2023 Smart code 203358507
 
-@import (reference) '~@stremio/stremio-colors/less/stremio-colors.less';
 @import (reference) '~stremio/common/screen-sizes.less';
 
-:import('~stremio/components/ModalDialog/styles.less') {
-    modal-dialog-container: modal-dialog-container;
-    title-modal-container: title-container;
-}
-
-@canvas: #070809;
-@side-panel-bg: rgba(10, 12, 18, 0.78);
-@border: rgba(255, 255, 255, 0.08);
+@canvas: #050505;
 
 .metadetails-container {
     display: flex;
@@ -21,8 +13,9 @@
     padding-right: var(--safe-area-inset-right);
     box-sizing: border-box;
     background: @canvas;
+    color: #f5f5f5;
 
-    // Ambient base layer behind everything (fallback when no backdrop)
+    // Optional ambient fallback layer for when no backdrop is present.
     .background-image-layer {
         position: fixed;
         top: 0;
@@ -30,21 +23,19 @@
         bottom: 0;
         left: 0;
         z-index: -1;
+        pointer-events: none;
         background:
-            radial-gradient(circle at 88% -10%, rgba(245, 197, 24, 0.07), transparent 45%),
-            radial-gradient(circle at 8% 12%, rgba(0, 60, 90, 0.18), transparent 42%),
-            linear-gradient(180deg, #0a0c12 0%, @canvas 100%);
+            radial-gradient(circle at 80% -10%, rgba(0, 146, 93, 0.10), transparent 50%),
+            radial-gradient(circle at 5% 10%, rgba(0, 80, 60, 0.16), transparent 45%),
+            linear-gradient(180deg, #08090b 0%, @canvas 100%);
 
         .background-image {
-            pointer-events: none;
             display: block;
             width: 100%;
             height: 100%;
             object-fit: cover;
             object-position: top center;
-            opacity: 0.18;
-            filter: saturate(1.05) blur(2px);
-            mix-blend-mode: screen;
+            opacity: 0;
         }
     }
 
@@ -54,7 +45,8 @@
         align-self: stretch;
     }
 
-    // Single scrollable column: meta panel first, then videos/streams list flowing below.
+    // Single scrollable column. The CustomMetaPanel renders the entire page
+    // (hero, story, cast, episodes, similar, footer) in one flow.
     .metadetails-content {
         flex: 1;
         align-self: stretch;
@@ -63,10 +55,27 @@
         display: flex;
         flex-direction: column;
         margin-top: calc(var(--top-overlay-size) * -1);
-        padding-top: var(--top-overlay-size);
         padding-bottom: var(--safe-area-inset-bottom, 0rem);
         overflow-y: auto;
         overflow-x: hidden;
+        scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+
+        &::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.12);
+            border-radius: 8px;
+        }
+
+        &::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(0, 146, 93, 0.5);
+        }
 
         .meta-message-container {
             align-self: stretch;
@@ -85,7 +94,6 @@
                 max-width: 100%;
                 margin-bottom: 1rem;
                 object-fit: contain;
-                object-position: center;
                 opacity: 0.85;
                 filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.5));
             }
@@ -93,38 +101,11 @@
             .message-label {
                 flex: none;
                 align-self: stretch;
-                font-size: 1.4rem;
+                font-size: 1.25rem;
                 font-weight: 600;
                 letter-spacing: -0.01em;
                 text-align: center;
-                color: var(--primary-foreground-color);
-            }
-        }
-
-        // Episodes / streams panel — now flows BELOW the meta panel as a full-width section.
-        .videos-list, .streams-list {
-            flex: 0 0 auto;
-            align-self: stretch;
-            position: relative;
-            width: 100%;
-            max-width: 100%;
-            background: linear-gradient(180deg, rgba(14, 17, 26, 0.92) 0%, rgba(8, 10, 16, 0.96) 100%);
-            border-top: 1px solid @border;
-            border-left: 0;
-            backdrop-filter: blur(28px) saturate(1.1);
-            -webkit-backdrop-filter: blur(28px) saturate(1.1);
-            box-shadow: 0 -28px 70px rgba(0, 0, 0, 0.45);
-
-            // Top edge highlight glow
-            &::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                height: 1px;
-                background: linear-gradient(90deg, rgba(255, 255, 255, 0.0) 0%, rgba(255, 255, 255, 0.10) 50%, rgba(255, 255, 255, 0.0) 100%);
-                pointer-events: none;
+                color: rgba(255, 255, 255, 0.85);
             }
         }
 
@@ -133,20 +114,6 @@
             align-self: stretch;
             width: 100%;
             min-width: 0;
-        }
-    }
-}
-
-@media only screen and (max-width: @minimum) {
-    .metadetails-container {
-        .metadetails-content {
-            .custom-meta-panel {
-                min-height: auto;
-            }
-
-            .videos-list, .streams-list {
-                box-shadow: 0 -16px 40px rgba(0, 0, 0, 0.5);
-            }
         }
     }
 }
