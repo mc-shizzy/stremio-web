@@ -119,7 +119,8 @@ const useMetaDetails = (urlParams) => {
         libraryItem: null,
         ratingInfo: null,
         metaExtensions: [],
-        isCustomApi: true
+        isCustomApi: true,
+        customInfo: { stars: [], stills: null, trailer: null, genre: '', imdbRating: null }
     });
 
     React.useEffect(() => {
@@ -156,7 +157,8 @@ const useMetaDetails = (urlParams) => {
             libraryItem: null,
             ratingInfo: null,
             metaExtensions: [],
-            isCustomApi: true
+            isCustomApi: true,
+            customInfo: { stars: [], stills: null, trailer: null, genre: '', imdbRating: null }
         });
 
         const fetchCustomMetaDetails = async () => {
@@ -168,6 +170,13 @@ const useMetaDetails = (urlParams) => {
                 const infoPayload = await infoResponse.json();
                 const subject = infoPayload?.data?.subject || {};
                 const resource = infoPayload?.data?.resource || {};
+                const customInfo = {
+                    stars: Array.isArray(infoPayload?.data?.stars) ? infoPayload.data.stars : [],
+                    stills: subject.stills && typeof subject.stills.url === 'string' ? subject.stills : null,
+                    trailer: subject.trailer && subject.trailer.videoAddress?.url ? subject.trailer : null,
+                    genre: typeof subject.genre === 'string' ? subject.genre : '',
+                    imdbRating: subject.imdbRatingValue || null,
+                };
                 const seasons = Array.isArray(resource.seasons) ? resource.seasons : [];
                 const videos = seasons.flatMap((seasonInfo) => {
                     const season = parseInt(seasonInfo.se, 10);
@@ -308,7 +317,8 @@ const useMetaDetails = (urlParams) => {
                         libraryItem: null,
                         ratingInfo: null,
                         metaExtensions: [],
-                        isCustomApi: true
+                        isCustomApi: true,
+                        customInfo
                     });
                 }
             } catch (_error) {

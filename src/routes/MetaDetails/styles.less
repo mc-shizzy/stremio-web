@@ -116,6 +116,13 @@
             box-shadow: -18px 0 40px rgba(0, 0, 0, 0.24);
             backdrop-filter: blur(20px);
         }
+
+        .custom-meta-panel {
+            flex: 1;
+            align-self: stretch;
+            min-width: 0;
+            min-height: 0;
+        }
     }
 }
 
@@ -149,7 +156,8 @@
 @media only screen and (max-width: @minimum) {
     .metadetails-container {
         .metadetails-content {
-            display: block;
+            display: flex;
+            flex-direction: column;
             overflow-y: auto;
 
             .spacing {
@@ -162,7 +170,13 @@
             }
 
             .videos-list, .streams-list {
+                flex: 0 0 auto;
                 border-radius: var(--border-radius) var(--border-radius) 0 0;
+            }
+
+            .custom-meta-panel {
+                flex: 1;
+                min-height: 40vh;
             }
         }
     }
