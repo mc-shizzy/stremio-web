@@ -1,12 +1,8 @@
-// Copyright (C) 2017-2024 Smart code 203358507
+// Copyright (C) 2017-2023 Smart code 203358507
 
-@import (reference) '~@stremio/stremio-colors/less/stremio-colors.less';
 @import (reference) '~stremio/common/screen-sizes.less';
 
-:import('~stremio/components/ModalDialog/styles.less') {
-    modal-dialog-container: modal-dialog-container;
-    title-modal-container: title-container;
-}
+@canvas: #050505;
 
 .metadetails-container {
     display: flex;
@@ -16,7 +12,10 @@
     padding-left: var(--safe-area-inset-left);
     padding-right: var(--safe-area-inset-right);
     box-sizing: border-box;
+    background: @canvas;
+    color: #f5f5f5;
 
+    // Optional ambient fallback layer for when no backdrop is present.
     .background-image-layer {
         position: fixed;
         top: 0;
@@ -24,38 +23,60 @@
         bottom: 0;
         left: 0;
         z-index: -1;
+        pointer-events: none;
         background:
-            radial-gradient(circle at top right, rgba(46, 24, 100, 0.45), transparent 45%),
-            radial-gradient(circle at 15% 20%, rgba(0, 92, 115, 0.28), transparent 40%),
-            linear-gradient(180deg, rgba(4, 8, 18, 0.82) 0%, rgba(5, 8, 14, 0.96) 100%);
+            radial-gradient(circle at 80% -10%, rgba(0, 146, 93, 0.10), transparent 50%),
+            radial-gradient(circle at 5% 10%, rgba(0, 80, 60, 0.16), transparent 45%),
+            linear-gradient(180deg, #08090b 0%, @canvas 100%);
 
         .background-image {
-            pointer-events: none; 
             display: block;
             width: 100%;
             height: 100%;
             object-fit: cover;
-            object-position: top left;
-            opacity: 0.42;
+            object-position: top center;
+            opacity: 0;
         }
     }
 
     .nav-bar {
-        z-index: 1;
+        z-index: 4;
         flex: none;
         align-self: stretch;
     }
 
+    // Single scrollable column. The CustomMetaPanel renders the entire page
+    // (hero, story, cast, episodes, similar, footer) in one flow.
     .metadetails-content {
         flex: 1;
         align-self: stretch;
         position: relative;
         z-index: 0;
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
         margin-top: calc(var(--top-overlay-size) * -1);
-        padding-top: var(--top-overlay-size);
         padding-bottom: var(--safe-area-inset-bottom, 0rem);
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+
+        &::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.12);
+            border-radius: 8px;
+        }
+
+        &::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(0, 146, 93, 0.5);
+        }
 
         .meta-message-container {
             align-self: stretch;
@@ -65,7 +86,7 @@
             justify-content: center;
             padding: 2rem;
             width: 100%;
-            height: 100%;
+            min-height: 60vh;
 
             .image {
                 flex: none;
@@ -74,54 +95,26 @@
                 max-width: 100%;
                 margin-bottom: 1rem;
                 object-fit: contain;
-                object-position: center;
-                opacity: 0.9;
+                opacity: 0.85;
+                filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.5));
             }
 
             .message-label {
                 flex: none;
                 align-self: stretch;
-                font-size: 2rem;
+                font-size: 1.25rem;
+                font-weight: 600;
+                letter-spacing: -0.01em;
                 text-align: center;
-                color: var(--primary-foreground-color);
+                color: rgba(255, 255, 255, 0.85);
             }
-        }
-
-        .videos-list, .streams-list {
-            flex: 0 0 26.5rem;
-            align-self: stretch;
-            border-radius: 1rem 0 0 1rem;
-            background: linear-gradient(180deg, rgba(16, 22, 40, 0.93) 0%, rgba(10, 14, 27, 0.95) 100%);
-            border-left: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: -20px 0 48px rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(22px);
         }
 
         .custom-meta-panel {
-            flex: 1;
+            flex: 0 0 auto;
             align-self: stretch;
+            width: 100%;
             min-width: 0;
-            min-height: 0;
-        }
-    }
-}
-
-@media only screen and (max-width: @minimum) {
-    .metadetails-container {
-        .metadetails-content {
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-
-            .videos-list, .streams-list {
-                flex: 0 0 auto;
-                border-radius: 1rem 1rem 0 0;
-            }
-
-            .custom-meta-panel {
-                flex: 1;
-                min-height: 40vh;
-            }
         }
     }
 }
