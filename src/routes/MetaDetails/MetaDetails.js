@@ -104,26 +104,6 @@ const MetaDetails = ({ urlParams, queryParams }) => {
                     streamPath={streamPath}
                     libraryItem={metaDetails.libraryItem}
                 />
-                {
-                    streamPath !== null ?
-                        <StreamsList
-                            className={styles['streams-list']}
-                            streams={metaDetails.streams}
-                            video={video}
-                            type={streamPath.type}
-                            onEpisodeSearch={handleEpisodeSearch}
-                        />
-                        :
-                        <VideosList
-                            className={styles['videos-list']}
-                            metaItem={metaDetails.metaItem}
-                            libraryItem={metaDetails.libraryItem}
-                            season={season}
-                            selectedVideoId={metaDetails.libraryItem?.state?.video_id}
-                            seasonOnSelect={seasonOnSelect}
-                            toggleNotifications={toggleNotifications}
-                        />
-                }
             </React.Fragment>
         );
     };
