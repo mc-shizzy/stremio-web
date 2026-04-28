@@ -358,13 +358,6 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
                                     <span>{inLibrary ? 'In Watchlist' : 'Add Watchlist'}</span>
                                 </Button>
                             ) : null}
-
-                            {trailerHref ? (
-                                <Button className={styles['btn-outline']} href={trailerHref}>
-                                    <Icon className={styles['btn-icon']} name={'trailer'} />
-                                    <span>Trailer</span>
-                                </Button>
-                            ) : null}
                         </div>
 
                         <div className={styles['actions-secondary']}>
