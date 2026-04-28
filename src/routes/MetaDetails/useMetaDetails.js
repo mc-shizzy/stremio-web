@@ -248,7 +248,9 @@ const useMetaDetails = (urlParams) => {
                                     if (typeof encoded === 'string') {
                                         const params = new URLSearchParams({
                                             customSubjectId: subjectId,
-                                            customType: type
+                                            customType: type,
+                                            audio: 'french',
+                                            title: subject.title || ''
                                         });
                                         if (streamQuery) {
                                             params.set('season', String(streamQuery.season));

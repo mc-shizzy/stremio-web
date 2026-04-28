@@ -8,8 +8,9 @@ const { usePlatform, useToast } = require('stremio/common');
 const { useServices } = require('stremio/services');
 const Option = require('./Option');
 const styles = require('./styles');
+const { AUDIO_PREFERENCES } = require('stremio/common/customAudioPreference');
 
-const OptionsMenu = React.memo(React.forwardRef(({ className, stream, playbackDevices, extraSubtitlesTracks, selectedExtraSubtitlesTrackId, qualityOptions, selectedQuality, onQualitySelected }, ref) => {
+const OptionsMenu = React.memo(React.forwardRef(({ className, stream, playbackDevices, extraSubtitlesTracks, selectedExtraSubtitlesTrackId, qualityOptions, selectedQuality, onQualitySelected, audioPreference, onAudioPreferenceSelected }, ref) => {
     const { t } = useTranslation();
     const { core } = useServices();
     const platform = usePlatform();
@@ -116,6 +117,27 @@ const OptionsMenu = React.memo(React.forwardRef(({ className, stream, playbackDe
     return (
         <div ref={ref} className={classnames(className, styles['options-menu-container'])} onMouseDown={onMouseDown}>
             {
+                typeof onAudioPreferenceSelected === 'function' ?
+                    <>
+                        <Option
+                            icon={'audio'}
+                            label={`Original (English)${audioPreference === AUDIO_PREFERENCES.ORIGINAL ? ' • current' : ''}`}
+                            deviceId={AUDIO_PREFERENCES.ORIGINAL}
+                            disabled={stream === null}
+                            onClick={onAudioPreferenceSelected}
+                        />
+                        <Option
+                            icon={'audio'}
+                            label={`French Dubbed${audioPreference === AUDIO_PREFERENCES.FRENCH ? ' • current' : ''}`}
+                            deviceId={AUDIO_PREFERENCES.FRENCH}
+                            disabled={stream === null}
+                            onClick={onAudioPreferenceSelected}
+                        />
+                    </>
+                    :
+                    null
+            }
+            {
                 qualityOptionsSorted.map((qualityOption) => (
                     <Option
                         key={`${qualityOption.quality}-${qualityOption.format || ''}`}
@@ -196,6 +218,8 @@ OptionsMenu.propTypes = {
     qualityOptions: PropTypes.array,
     selectedQuality: PropTypes.number,
     onQualitySelected: PropTypes.func,
+    audioPreference: PropTypes.string,
+    onAudioPreferenceSelected: PropTypes.func,
 };
 
 module.exports = OptionsMenu;

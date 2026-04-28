@@ -105,6 +105,13 @@
     max-width: 56rem;
 }
 
+.chips-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+}
+
 .type-chip {
     display: inline-flex;
     align-self: flex-start;
@@ -121,6 +128,63 @@
     text-transform: uppercase;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
+}
+
+.vf-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    height: 2rem;
+    padding: 0 0.75rem 0 0.5rem;
+    border-radius: 0.45rem;
+    background: linear-gradient(135deg, #0057e7 0%, #002d8a 100%);
+    border: 1px solid rgba(0, 87, 231, 0.5);
+    box-shadow:
+        0 0 12px rgba(0, 87, 231, 0.4),
+        0 0 24px rgba(0, 87, 231, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    animation: vfPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes vfPulse {
+    0%, 100% {
+        box-shadow:
+            0 0 12px rgba(0, 87, 231, 0.4),
+            0 0 24px rgba(0, 87, 231, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
+    50% {
+        box-shadow:
+            0 0 18px rgba(0, 87, 231, 0.6),
+            0 0 36px rgba(0, 87, 231, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+}
+
+.vf-badge-text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.6rem;
+    height: 1.35rem;
+    padding: 0 0.35rem;
+    border-radius: 0.3rem;
+    background: rgba(255, 255, 255, 0.95);
+    color: #0057e7;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.vf-badge-label {
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .hero-title {

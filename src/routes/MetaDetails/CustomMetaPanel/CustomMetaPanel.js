@@ -12,6 +12,7 @@ const styles = require('./styles');
 
 const SEARCH_API_URL = 'https://apii.freehandyflix.online/api/search';
 const SOURCES_API_URL = 'https://apii.freehandyflix.online/api/sources';
+const { checkFrenchAvailable, AUDIO_PREFERENCES } = require('stremio/common/customAudioPreference');
 
 const formatTime = (seconds) => {
     if (typeof seconds !== 'number' || isNaN(seconds) || seconds < 0) return '00:00';
@@ -164,11 +165,14 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
             if (typeof encoded !== 'string' || encoded.length === 0) {
                 return;
             }
+            const useVfId = vfAvailable && vfResolvedId ? vfResolvedId : meta.id;
             const params = new URLSearchParams({
-                customSubjectId: String(meta.id),
+                customSubjectId: String(useVfId),
                 customType: 'series',
                 season: String(episode.season),
-                episode: String(episode.episode)
+                episode: String(episode.episode),
+                audio: vfAvailable ? AUDIO_PREFERENCES.FRENCH : AUDIO_PREFERENCES.ORIGINAL,
+                title: meta?.name || ''
             });
             if (typeof firstSource.quality === 'number') {
                 params.set('quality', String(firstSource.quality));
@@ -211,9 +215,12 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
             if (typeof encoded !== 'string' || encoded.length === 0) {
                 return;
             }
+            const useVfId = vfAvailable && vfResolvedId ? vfResolvedId : meta.id;
             const params = new URLSearchParams({
-                customSubjectId: String(meta.id),
-                customType: 'movie'
+                customSubjectId: String(useVfId),
+                customType: 'movie',
+                audio: vfAvailable ? AUDIO_PREFERENCES.FRENCH : AUDIO_PREFERENCES.ORIGINAL,
+                title: meta?.name || ''
             });
             if (typeof firstSource.quality === 'number') {
                 params.set('quality', String(firstSource.quality));
@@ -306,6 +313,38 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
             .catch(() => { /* ignore */ });
         return () => { cancelled = true; };
     }, [core, trailerUrl]);
+
+    // ---- VF availability check -------------------------------------------
+    const [vfAvailable, setVfAvailable] = React.useState(false);
+    const [vfResolvedId, setVfResolvedId] = React.useState(null);
+    React.useEffect(() => {
+        if (!meta?.id || !meta?.name) {
+            setVfAvailable(false);
+            setVfResolvedId(null);
+            return;
+        }
+        let cancelled = false;
+        const checkVf = async () => {
+            try {
+                const result = await checkFrenchAvailable({
+                    subjectId: meta.id,
+                    title: meta.name,
+                    type: isSeries ? 'series' : 'movie'
+                });
+                if (!cancelled) {
+                    setVfAvailable(result.available);
+                    setVfResolvedId(result.resolvedId);
+                }
+            } catch (_e) {
+                if (!cancelled) {
+                    setVfAvailable(false);
+                    setVfResolvedId(null);
+                }
+            }
+        };
+        checkVf();
+        return () => { cancelled = true; };
+    }, [meta?.id, meta?.name, isSeries]);
 
     // ---- similar fetch ---------------------------------------------------
     const [similar, setSimilar] = React.useState([]);
@@ -416,7 +455,15 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
                 </div>
 
                 <div className={styles['hero-content']}>
-                    <div className={styles['type-chip']}>{isSeries ? 'Series' : 'Movie'}</div>
+                    <div className={styles['chips-row']}>
+                        <div className={styles['type-chip']}>{isSeries ? 'Series' : 'Movie'}</div>
+                        {vfAvailable ? (
+                            <div className={styles['vf-badge']}>
+                                <span className={styles['vf-badge-text']}>VF</span>
+                                <span className={styles['vf-badge-label']}>French Dubbed</span>
+                            </div>
+                        ) : null}
+                    </div>
 
                     <h1 className={styles['hero-title']}>{meta?.name}</h1>
 

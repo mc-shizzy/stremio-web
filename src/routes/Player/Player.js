@@ -29,6 +29,7 @@ const styles = require('./styles');
 const Video = require('./Video');
 const { default: Indicator } = require('./Indicator/Indicator');
 const { saveProgress, removeProgress } = require('stremio/common/customContinueWatching');
+const { AUDIO_PREFERENCES, DEFAULT_AUDIO_PREFERENCE, resolvePreferredSubjectId } = require('stremio/common/customAudioPreference');
 
 const SOURCES_API_URL = 'https://apii.freehandyflix.online/api/sources';
 
@@ -99,7 +100,18 @@ const Player = ({ urlParams, queryParams }) => {
     const [error, setError] = React.useState(null);
     const [customPlaybackOptions, setCustomPlaybackOptions] = React.useState({
         qualityOptions: [],
-        subtitleTracks: []
+        subtitleTracks: [],
+        resolvedSubjectId: null
+    });
+    const [audioPreference, setAudioPreference] = React.useState(() => {
+        const audio = queryParams.get('audio');
+        if (audio === AUDIO_PREFERENCES.ORIGINAL) {
+            return AUDIO_PREFERENCES.ORIGINAL;
+        }
+        if (audio === AUDIO_PREFERENCES.FRENCH) {
+            return AUDIO_PREFERENCES.FRENCH;
+        }
+        return DEFAULT_AUDIO_PREFERENCE;
     });
     const customPlaybackContext = React.useMemo(() => {
         if (!queryParams.has('customSubjectId')) {
@@ -110,12 +122,14 @@ const Player = ({ urlParams, queryParams }) => {
         const season = queryParams.has('season') ? parseInt(queryParams.get('season'), 10) : null;
         const episode = queryParams.has('episode') ? parseInt(queryParams.get('episode'), 10) : null;
         const quality = queryParams.has('quality') ? parseInt(queryParams.get('quality'), 10) : null;
+        const title = queryParams.get('title') || '';
         return {
             subjectId,
             type,
             season: !isNaN(season) ? season : null,
             episode: !isNaN(episode) ? episode : null,
-            quality: !isNaN(quality) ? quality : null
+            quality: !isNaN(quality) ? quality : null,
+            title
         };
     }, [queryParams, urlParams.type]);
 
@@ -134,6 +148,35 @@ const Player = ({ urlParams, queryParams }) => {
     const selectedQuality = React.useMemo(() => {
         return customPlaybackContext?.quality ?? null;
     }, [customPlaybackContext]);
+    const buildCustomPlayerParams = React.useCallback((override = {}) => {
+        if (customPlaybackContext === null) {
+            return null;
+        }
+        const params = new URLSearchParams();
+        params.set('customSubjectId', override.subjectId || customPlaybackContext.subjectId);
+        params.set('customType', customPlaybackContext.type);
+        if (typeof customPlaybackContext.season === 'number') {
+            params.set('season', String(customPlaybackContext.season));
+        }
+        if (typeof customPlaybackContext.episode === 'number') {
+            params.set('episode', String(customPlaybackContext.episode));
+        }
+        if (typeof override.quality === 'number' && !isNaN(override.quality)) {
+            params.set('quality', String(override.quality));
+        } else if (typeof customPlaybackContext.quality === 'number') {
+            params.set('quality', String(customPlaybackContext.quality));
+        }
+        if (typeof override.startTime === 'number' && !isNaN(override.startTime) && override.startTime > 0) {
+            params.set('startTime', String(Math.floor(override.startTime)));
+        } else if (typeof video.state.time === 'number' && !isNaN(video.state.time) && video.state.time > 0) {
+            params.set('startTime', String(Math.floor(video.state.time)));
+        }
+        params.set('audio', override.audioPreference || audioPreference);
+        if (customPlaybackContext.title) {
+            params.set('title', customPlaybackContext.title);
+        }
+        return params;
+    }, [customPlaybackContext, video.state.time, audioPreference]);
 
     const onImplementationChanged = React.useCallback(() => {
         video.setSubtitlesSize(settings.subtitlesSize);
@@ -418,18 +461,13 @@ const Player = ({ urlParams, queryParams }) => {
             if (typeof encoded !== 'string') {
                 return;
             }
-            const params = new URLSearchParams();
-            params.set('customSubjectId', customPlaybackContext.subjectId);
-            params.set('customType', customPlaybackContext.type);
-            if (typeof customPlaybackContext.season === 'number') {
-                params.set('season', String(customPlaybackContext.season));
-            }
-            if (typeof customPlaybackContext.episode === 'number') {
-                params.set('episode', String(customPlaybackContext.episode));
-            }
-            params.set('quality', String(quality));
-            if (typeof video.state.time === 'number' && !isNaN(video.state.time) && video.state.time > 0) {
-                params.set('startTime', String(Math.floor(video.state.time)));
+            const params = buildCustomPlayerParams({
+                subjectId: customPlaybackOptions.resolvedSubjectId || customPlaybackContext.subjectId,
+                quality,
+                audioPreference
+            });
+            if (params === null) {
+                return;
             }
             window.location.replace(`#/player/${encodeURIComponent(encoded)}?${params.toString()}`);
         } catch (_error) {
@@ -440,17 +478,74 @@ const Player = ({ urlParams, queryParams }) => {
                 timeout: 2500
             });
         }
-    }, [customPlaybackContext, customPlaybackOptions.qualityOptions, services.core, toast, t, video.state.time]);
+    }, [customPlaybackContext, customPlaybackOptions.qualityOptions, customPlaybackOptions.resolvedSubjectId, services.core, toast, t, buildCustomPlayerParams, audioPreference]);
+    const onAudioPreferenceSelected = React.useCallback(async (preferenceValue) => {
+        if (customPlaybackContext === null) {
+            return;
+        }
+        const nextPreference = preferenceValue === AUDIO_PREFERENCES.FRENCH ? AUDIO_PREFERENCES.FRENCH : AUDIO_PREFERENCES.ORIGINAL;
+        setAudioPreference(nextPreference);
+        const resolvedSubjectId = await resolvePreferredSubjectId({
+            subjectId: customPlaybackContext.subjectId,
+            title: customPlaybackContext.title || player.title || player.metaItem?.content?.name || '',
+            type: customPlaybackContext.type,
+            preference: nextPreference
+        });
+        const query = customPlaybackContext.type === 'series' && customPlaybackContext.season !== null && customPlaybackContext.episode !== null ?
+            `?season=${customPlaybackContext.season}&episode=${customPlaybackContext.episode}` :
+            '';
+        try {
+            const response = await fetch(`${SOURCES_API_URL}/${encodeURIComponent(resolvedSubjectId)}${query}`);
+            if (!response.ok) {
+                return;
+            }
+            const payload = await response.json();
+            const processedSources = Array.isArray(payload?.data?.processedSources) ? payload.data.processedSources : [];
+            const firstSource = processedSources.find((source) => typeof (source.proxyUrl || source.directUrl) === 'string' && (source.proxyUrl || source.directUrl).length > 0);
+            if (!firstSource) {
+                return;
+            }
+            const streamUrl = firstSource.proxyUrl || firstSource.directUrl;
+            const encoded = await services.core.transport.encodeStream({ url: streamUrl });
+            if (typeof encoded !== 'string' || encoded.length === 0) {
+                return;
+            }
+            const quality = typeof firstSource.quality === 'number' ? firstSource.quality : parseInt(firstSource.quality, 10);
+            const params = buildCustomPlayerParams({
+                subjectId: resolvedSubjectId,
+                quality: !isNaN(quality) ? quality : null,
+                audioPreference: nextPreference
+            });
+            if (params === null) {
+                return;
+            }
+            window.location.replace(`#/player/${encodeURIComponent(encoded)}?${params.toString()}`);
+        } catch (_error) {
+            // Ignore errors and keep current stream.
+        }
+    }, [customPlaybackContext, player.title, player.metaItem, services.core, buildCustomPlayerParams]);
 
     onFileDrop(CONSTANTS.SUPPORTED_LOCAL_SUBTITLES, async (filename, buffer) => {
         video.addLocalSubtitles(filename, buffer);
     });
 
     React.useEffect(() => {
+        const audio = queryParams.get('audio');
+        if (audio === AUDIO_PREFERENCES.ORIGINAL) {
+            setAudioPreference(AUDIO_PREFERENCES.ORIGINAL);
+        } else if (audio === AUDIO_PREFERENCES.FRENCH) {
+            setAudioPreference(AUDIO_PREFERENCES.FRENCH);
+        } else {
+            setAudioPreference(DEFAULT_AUDIO_PREFERENCE);
+        }
+    }, [queryParams]);
+
+    React.useEffect(() => {
         if (customPlaybackContext === null) {
             setCustomPlaybackOptions({
                 qualityOptions: [],
-                subtitleTracks: []
+                subtitleTracks: [],
+                resolvedSubjectId: null
             });
             return;
         }
@@ -462,7 +557,13 @@ const Player = ({ urlParams, queryParams }) => {
 
         const fetchPlaybackOptions = async () => {
             try {
-                const response = await fetch(`${SOURCES_API_URL}/${encodeURIComponent(customPlaybackContext.subjectId)}${query}`);
+                const resolvedSubjectId = await resolvePreferredSubjectId({
+                    subjectId: customPlaybackContext.subjectId,
+                    title: customPlaybackContext.title || player.title || player.metaItem?.content?.name || '',
+                    type: customPlaybackContext.type,
+                    preference: audioPreference
+                });
+                const response = await fetch(`${SOURCES_API_URL}/${encodeURIComponent(resolvedSubjectId)}${query}`);
                 if (!response.ok) {
                     throw new Error(`Sources API failed with status ${response.status}`);
                 }
@@ -492,14 +593,16 @@ const Player = ({ urlParams, queryParams }) => {
                 if (!cancelled) {
                     setCustomPlaybackOptions({
                         qualityOptions,
-                        subtitleTracks: subtitles
+                        subtitleTracks: subtitles,
+                        resolvedSubjectId
                     });
                 }
             } catch (_error) {
                 if (!cancelled) {
                     setCustomPlaybackOptions({
                         qualityOptions: [],
-                        subtitleTracks: []
+                        subtitleTracks: [],
+                        resolvedSubjectId: null
                     });
                 }
             }
@@ -509,7 +612,7 @@ const Player = ({ urlParams, queryParams }) => {
         return () => {
             cancelled = true;
         };
-    }, [customPlaybackContext]);
+    }, [customPlaybackContext, audioPreference, player.title, player.metaItem]);
 
     React.useEffect(() => {
         setError(null);
@@ -1120,6 +1223,8 @@ const Player = ({ urlParams, queryParams }) => {
                     qualityOptions={customPlaybackOptions.qualityOptions}
                     selectedQuality={selectedQuality}
                     onQualitySelected={onQualitySelected}
+                    audioPreference={audioPreference}
+                    onAudioPreferenceSelected={onAudioPreferenceSelected}
                 />
             </ContextMenu>
             <HorizontalNavBar
@@ -1252,6 +1357,8 @@ const Player = ({ urlParams, queryParams }) => {
                     qualityOptions={customPlaybackOptions.qualityOptions}
                     selectedQuality={selectedQuality}
                     onQualitySelected={onQualitySelected}
+                    audioPreference={audioPreference}
+                    onAudioPreferenceSelected={onAudioPreferenceSelected}
                 />
             </Transition>
         </div>
