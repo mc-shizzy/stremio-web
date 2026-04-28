@@ -50,13 +50,18 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
 
     // ---- seasons & episodes ----------------------------------------------
     const allSeasons = React.useMemo(() => {
-        if (!Array.isArray(meta?.videos)) return [];
+        if (!Array.isArray(meta?.videos)) {
+            console.log('[v0] allSeasons: meta.videos is not an array', meta?.videos);
+            return [];
+        }
         const set = new Set(
             meta.videos
                 .map((v) => v.season)
                 .filter((s) => typeof s === 'number' && s > 0)
         );
-        return Array.from(set).sort((a, b) => a - b);
+        const result = Array.from(set).sort((a, b) => a - b);
+        console.log('[v0] allSeasons computed:', result, 'from videos count:', meta.videos.length);
+        return result;
     }, [meta?.videos]);
 
     const [activeSeason, setActiveSeason] = React.useState(null);
@@ -269,7 +274,7 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
     const [activeTab, setActiveTab] = React.useState('episode');
     const showTabs = isSeries;
 
-    // ---- season dropdown -------------------------------------------------
+// ---- season dropdown -------------------------------------------------
     const [seasonOpen, setSeasonOpen] = React.useState(false);
     const seasonDropdownRef = React.useRef(null);
     React.useEffect(() => {
@@ -280,7 +285,11 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
             }
         };
         document.addEventListener('mousedown', onDocClick);
-        return () => document.removeEventListener('mousedown', onDocClick);
+        document.addEventListener('touchstart', onDocClick, { passive: true });
+        return () => {
+            document.removeEventListener('mousedown', onDocClick);
+            document.removeEventListener('touchstart', onDocClick);
+        };
     }, [seasonOpen]);
 
     // ---- horizontal rail scroll helpers ----------------------------------
@@ -490,7 +499,11 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
                                             <button
                                                 type="button"
                                                 className={classnames(styles['season-trigger'], { [styles['season-trigger-open']]: seasonOpen })}
-                                                onClick={() => setSeasonOpen((v) => !v)}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    console.log('[v0] Season trigger clicked, allSeasons:', allSeasons, 'seasonOpen:', seasonOpen);
+                                                    setSeasonOpen((v) => !v);
+                                                }}
                                             >
                                                 <span>Season {activeSeason}</span>
                                                 <Icon className={styles['season-caret']} name={'caret-down'} />

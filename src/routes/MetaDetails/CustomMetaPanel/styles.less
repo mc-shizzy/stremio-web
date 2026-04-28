@@ -983,8 +983,8 @@
         width: 100%;
     }
     .actions-primary {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
+        display: flex;
+        flex-direction: column;
         gap: 0.55rem;
         width: 100%;
     }
@@ -993,10 +993,6 @@
         grid-template-columns: repeat(3, 1fr);
         gap: 0.55rem;
         width: 100%;
-    }
-    // Watch Now spans full width on mobile (primary CTA)
-    .actions-primary > *:first-child {
-        grid-column: 1 / -1;
     }
     .btn-primary,
     .btn-outline {
