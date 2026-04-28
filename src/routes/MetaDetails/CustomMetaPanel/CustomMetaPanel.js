@@ -237,33 +237,9 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
         }
     }, [core, meta?.id]);
 
-    // ---- library / share / like ------------------------------------------
+    // ---- library / share --------------------------------------------------
     const inLibrary = !!libraryItem && libraryItem.removed !== true;
-    const [liked, setLiked] = React.useState(false);
     const [shareState, setShareState] = React.useState('idle');
-
-    React.useEffect(() => {
-        if (!meta?.id || typeof localStorage === 'undefined') return;
-        try {
-            const likes = JSON.parse(localStorage.getItem('saintstream_likes') || '{}');
-            setLiked(!!likes[meta.id]);
-        } catch (_e) {
-            // ignore
-        }
-    }, [meta?.id]);
-
-    const toggleLike = React.useCallback(() => {
-        if (!meta?.id || typeof localStorage === 'undefined') return;
-        try {
-            const likes = JSON.parse(localStorage.getItem('saintstream_likes') || '{}');
-            if (likes[meta.id]) delete likes[meta.id];
-            else likes[meta.id] = Date.now();
-            localStorage.setItem('saintstream_likes', JSON.stringify(likes));
-            setLiked(!!likes[meta.id]);
-        } catch (_e) {
-            // ignore
-        }
-    }, [meta?.id]);
 
     const toggleLibrary = React.useCallback(() => {
         if (!meta) return;
@@ -528,14 +504,6 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
                             >
                                 <Icon className={styles['btn-icon']} name={shareState === 'copied' ? 'checkmark' : 'share'} />
                                 <span>{shareState === 'copied' ? 'Copied' : 'Share'}</span>
-                            </Button>
-                            <Button
-                                className={classnames(styles['btn-outline'], { [styles['btn-active']]: liked })}
-                                onClick={toggleLike}
-                                title={liked ? 'Unlike' : 'Like'}
-                            >
-                                <Icon className={styles['btn-icon']} name={'thumbs-up'} />
-                                <span>{liked ? 'Liked' : 'Like'}</span>
                             </Button>
                         </div>
                     </div>
