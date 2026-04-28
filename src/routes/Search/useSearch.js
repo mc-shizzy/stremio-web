@@ -36,6 +36,9 @@ const useSearch = (queryParams) => {
                     name: item.title,
                     poster: item.cover?.url || '',
                     posterShape: 'poster',
+                    deepLinks: {
+                        metaDetailsVideos: `#/metadetails/${item.subjectType === 1 ? 'movie' : 'series'}/${encodeURIComponent(String(item.subjectId))}`
+                    }
                 }));
 
                 if (requestId === requestIdRef.current) {

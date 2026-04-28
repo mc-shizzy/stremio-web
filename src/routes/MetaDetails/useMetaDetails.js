@@ -2,6 +2,10 @@
 
 const React = require('react');
 const { useModelState } = require('stremio/common');
+const { useServices } = require('stremio/services');
+
+const INFO_API_URL = 'https://apii.freehandyflix.online/api/info';
+const SOURCES_API_URL = 'https://apii.freehandyflix.online/api/sources';
 
 const map = (metaDetails) => ({
     ...metaDetails,
@@ -35,7 +39,14 @@ const map = (metaDetails) => ({
 });
 
 const useMetaDetails = (urlParams) => {
+    const { core } = useServices();
+    const isCustomSubjectId = React.useMemo(() => /^\d+$/.test(urlParams?.id || ''), [urlParams?.id]);
     const action = React.useMemo(() => {
+        if (isCustomSubjectId) {
+            return {
+                action: 'Unload'
+            };
+        }
         if (typeof urlParams.type === 'string' && typeof urlParams.id === 'string') {
             return {
                 action: 'Load',
@@ -66,8 +77,215 @@ const useMetaDetails = (urlParams) => {
                 action: 'Unload'
             };
         }
-    }, [urlParams]);
-    return useModelState({ model: 'meta_details', action, map });
+    }, [urlParams, isCustomSubjectId]);
+    const coreMetaDetails = useModelState({ model: 'meta_details', action, map });
+    const [customMetaDetails, setCustomMetaDetails] = React.useState({
+        selected: null,
+        metaItem: null,
+        streams: [],
+        libraryItem: null,
+        ratingInfo: null,
+        metaExtensions: [],
+        isCustomApi: true
+    });
+
+    React.useEffect(() => {
+        if (!isCustomSubjectId || typeof urlParams.type !== 'string' || typeof urlParams.id !== 'string') {
+            return;
+        }
+
+        let cancelled = false;
+        const subjectId = urlParams.id;
+        const type = urlParams.type;
+        const selected = {
+            metaPath: {
+                resource: 'meta',
+                type,
+                id: subjectId,
+                extra: []
+            },
+            streamPath: null
+        };
+
+        if (type === 'movie' || (typeof urlParams.videoId === 'string' && urlParams.videoId.length > 0)) {
+            selected.streamPath = {
+                resource: 'stream',
+                type,
+                id: type === 'movie' ? subjectId : urlParams.videoId,
+                extra: []
+            };
+        }
+
+        setCustomMetaDetails({
+            selected,
+            metaItem: { content: { type: 'Loading' } },
+            streams: type === 'movie' || selected.streamPath !== null ? [{ content: { type: 'Loading' } }] : [],
+            libraryItem: null,
+            ratingInfo: null,
+            metaExtensions: [],
+            isCustomApi: true
+        });
+
+        const parseSeriesVideoId = (videoId) => {
+            if (typeof videoId !== 'string') {
+                return null;
+            }
+            const parts = videoId.split(':');
+            if (parts.length < 3) {
+                return null;
+            }
+            const season = parseInt(parts[1], 10);
+            const episode = parseInt(parts[2], 10);
+            return !isNaN(season) && !isNaN(episode) ? { season, episode } : null;
+        };
+
+        const fetchCustomMetaDetails = async () => {
+            try {
+                const infoResponse = await fetch(`${INFO_API_URL}/${encodeURIComponent(subjectId)}`);
+                if (!infoResponse.ok) {
+                    throw new Error(`Info API failed with status ${infoResponse.status}`);
+                }
+                const infoPayload = await infoResponse.json();
+                const subject = infoPayload?.data?.subject || {};
+                const resource = infoPayload?.data?.resource || {};
+                const seasons = Array.isArray(resource.seasons) ? resource.seasons : [];
+                const videos = seasons.flatMap((seasonInfo) => {
+                    const season = parseInt(seasonInfo.se, 10);
+                    const maxEp = parseInt(seasonInfo.maxEp, 10);
+                    if (isNaN(season) || isNaN(maxEp) || maxEp <= 0) {
+                        return [];
+                    }
+
+                    return Array.from({ length: maxEp }, (_, index) => {
+                        const episode = index + 1;
+                        const videoId = `${subjectId}:${season}:${episode}`;
+                        return {
+                            id: videoId,
+                            title: `Episode ${episode}`,
+                            season,
+                            episode,
+                            released: new Date(typeof subject.releaseDate === 'string' ? subject.releaseDate : NaN),
+                            thumbnail: subject.cover?.url || '',
+                            upcoming: false,
+                            watched: false,
+                            progress: 0,
+                            scheduled: false,
+                            deepLinks: {
+                                metaDetailsStreams: `#/metadetails/${type}/${encodeURIComponent(subjectId)}/${encodeURIComponent(videoId)}`
+                            }
+                        };
+                    });
+                });
+
+                const metaItem = {
+                    content: {
+                        type: 'Ready',
+                        content: {
+                            id: String(subject.subjectId || subjectId),
+                            type,
+                            name: subject.title || '',
+                            logo: '',
+                            background: subject.cover?.url || '',
+                            runtime: subject.duration ? `${subject.duration} min` : '',
+                            releaseInfo: typeof subject.releaseDate === 'string' ? subject.releaseDate.split('-')[0] : '',
+                            released: new Date(typeof subject.releaseDate === 'string' ? subject.releaseDate : NaN),
+                            description: subject.description || '',
+                            links: [],
+                            trailerStreams: [],
+                            inLibrary: false,
+                            watched: false,
+                            videos,
+                        }
+                    }
+                };
+
+                const streamQuery = type === 'series' ? parseSeriesVideoId(urlParams.videoId) : null;
+                const shouldLoadSources = type === 'movie' || streamQuery !== null;
+                let streams = [];
+                if (shouldLoadSources) {
+                    const query = streamQuery ? `?season=${streamQuery.season}&episode=${streamQuery.episode}` : '';
+                    const sourcesResponse = await fetch(`${SOURCES_API_URL}/${encodeURIComponent(subjectId)}${query}`);
+                    if (sourcesResponse.ok) {
+                        const sourcesPayload = await sourcesResponse.json();
+                        const processedSources = Array.isArray(sourcesPayload?.data?.processedSources) ? sourcesPayload.data.processedSources : [];
+                        const streamItems = await Promise.all(processedSources.map(async (source) => {
+                            const streamUrl = source.proxyUrl || source.directUrl;
+                            let playerLink = source.directUrl || '';
+                            if (typeof streamUrl === 'string' && streamUrl.length > 0) {
+                                try {
+                                    const encoded = await core.transport.encodeStream({ url: streamUrl });
+                                    if (typeof encoded === 'string') {
+                                        playerLink = `#/player/${encodeURIComponent(encoded)}`;
+                                    }
+                                } catch (error) {
+                                    // Fallback to direct URL if encoding fails.
+                                }
+                            }
+                            const sizeInMb = !isNaN(parseInt(source.size, 10)) ? (parseInt(source.size, 10) / (1024 * 1024)).toFixed(0) : null;
+                            return {
+                                name: `${source.quality || ''}p ${source.format ? String(source.format).toUpperCase() : ''}`.trim(),
+                                description: sizeInMb ? `${sizeInMb} MB` : 'Stream',
+                                thumbnail: subject.cover?.url || '',
+                                progress: 0,
+                                deepLinks: {
+                                    player: playerLink,
+                                    externalPlayer: {
+                                        streaming: source.directUrl || '',
+                                        download: source.proxyUrl || source.directUrl || ''
+                                    }
+                                }
+                            };
+                        }));
+
+                        streams = [{
+                            addon: {
+                                transportUrl: 'https://apii.freehandyflix.online',
+                                manifest: {
+                                    name: 'Freehandyflix'
+                                }
+                            },
+                            content: {
+                                type: 'Ready',
+                                content: streamItems
+                            }
+                        }];
+                    }
+                }
+
+                if (!cancelled) {
+                    setCustomMetaDetails({
+                        selected,
+                        metaItem,
+                        streams,
+                        libraryItem: null,
+                        ratingInfo: null,
+                        metaExtensions: [],
+                        isCustomApi: true
+                    });
+                }
+            } catch (error) {
+                if (!cancelled) {
+                    setCustomMetaDetails({
+                        selected,
+                        metaItem: { content: { type: 'Err', content: 'Custom API failed' } },
+                        streams: [],
+                        libraryItem: null,
+                        ratingInfo: null,
+                        metaExtensions: [],
+                        isCustomApi: true
+                    });
+                }
+            }
+        };
+
+        fetchCustomMetaDetails();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [core, isCustomSubjectId, urlParams]);
+
+    return isCustomSubjectId ? customMetaDetails : coreMetaDetails;
 };
 
 module.exports = useMetaDetails;
