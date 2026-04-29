@@ -11,7 +11,7 @@
         "start": "webpack serve --mode development",
         "start-prod": "webpack serve --mode production",
         "start:single": "node server.js",
-        "koyeb-build": "pnpm install --no-frozen-lockfile && pnpm run build",
+        "koyeb-build": "npm ci && npm run build",
         "koyeb-start": "node server.js",
         "build": "webpack --mode production",
         "test": "jest",
