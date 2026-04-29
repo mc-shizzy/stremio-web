@@ -143,7 +143,15 @@ const SearchBar = React.memo(({ className, query, active }) => {
                                     </div>
                                     {
                                         searchHistory.items.slice(0, 8).map(({ query, deepLinks }, index) => (
-                                            <Button key={index} className={styles['item']} href={deepLinks.search} onClick={closeHistory}>
+                                            <Button
+                                                key={index}
+                                                className={styles['item']}
+                                                href={deepLinks.search}
+                                                onClick={() => {
+                                                    setCurrentQuery(query);
+                                                    closeHistory();
+                                                }}
+                                            >
                                                 {query}
                                             </Button>
                                         ))
@@ -160,7 +168,15 @@ const SearchBar = React.memo(({ className, query, active }) => {
                                     </div>
                                     {
                                         localSearch.items.map(({ query, deepLinks }, index) => (
-                                            <Button key={index} className={styles['item']} href={deepLinks.search} onClick={closeHistory}>
+                                            <Button
+                                                key={index}
+                                                className={styles['item']}
+                                                href={deepLinks.search}
+                                                onClick={() => {
+                                                    setCurrentQuery(query);
+                                                    closeHistory();
+                                                }}
+                                            >
                                                 {query}
                                             </Button>
                                         ))

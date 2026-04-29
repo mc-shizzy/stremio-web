@@ -8,9 +8,7 @@ const useSearch = (queryParams) => {
     const [catalogs, setCatalogs] = React.useState([]);
     const [loading, setLoading] = React.useState(false);
     const requestIdRef = React.useRef(0);
-    const query = React.useMemo(() => {
-        return queryParams.get('search') ?? queryParams.get('query') ?? '';
-    }, [queryParams]);
+    const query = queryParams.get('search') ?? queryParams.get('query') ?? '';
 
     React.useEffect(() => {
         const normalizedQuery = query.trim();
