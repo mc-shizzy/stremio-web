@@ -212,6 +212,32 @@
                     }
                 }
             }
+
+            .google-button {
+                background: #ffffff;
+                margin-bottom: 1rem;
+
+                .icon {
+                    color: #1f1f1f;
+                }
+
+                .label {
+                    color: #1f1f1f;
+                }
+
+                &:hover, &:focus {
+                    outline: var(--focus-outline-size) solid #ffffff;
+                    background-color: transparent;
+
+                    .icon {
+                        color: var(--primary-foreground-color);
+                    }
+
+                    .label {
+                        color: var(--primary-foreground-color);
+                    }
+                }
+            }
         }
     }
 }

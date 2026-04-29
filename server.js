@@ -1,15 +1,18 @@
 #!/usr/bin/env node
 
+const path = require('path');
+const fs = require('fs');
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-const AUTH_PORT = parseInt(process.env.AUTH_PORT || '5050', 10);
+const PORT = parseInt(process.env.PORT || process.env.AUTH_PORT || '5050', 10);
 const MONGO_URI = process.env.MONGO_URI || '';
 const JWT_SECRET = process.env.JWT_SECRET || '';
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || '*';
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
 
 if (!MONGO_URI) {
     console.error('Missing MONGO_URI environment variable.');
@@ -23,7 +26,8 @@ if (!JWT_SECRET) {
 
 const userSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true, index: true },
-    passwordHash: { type: String, required: true },
+    passwordHash: { type: String, default: null },
+    authProvider: { type: String, enum: ['local', 'google'], default: 'local' },
 }, {
     timestamps: true
 });
@@ -78,7 +82,7 @@ app.post('/api/auth/register', async (req, res) => {
             return res.status(409).json({ message: 'Email already in use' });
         }
         const passwordHash = await bcrypt.hash(password, 10);
-        const created = await User.create({ email, passwordHash });
+        const created = await User.create({ email, passwordHash, authProvider: 'local' });
         const token = createToken(created);
         return res.status(201).json({
             token,
@@ -103,6 +107,9 @@ app.post('/api/auth/login', async (req, res) => {
         if (!user) {
             return res.status(401).json({ message: 'Invalid email or password' });
         }
+        if (!user.passwordHash) {
+            return res.status(401).json({ message: 'Use Google login for this account' });
+        }
         const valid = await bcrypt.compare(password, user.passwordHash);
         if (!valid) {
             return res.status(401).json({ message: 'Invalid email or password' });
@@ -120,6 +127,51 @@ app.post('/api/auth/login', async (req, res) => {
     }
 });
 
+app.post('/api/auth/google', async (req, res) => {
+    try {
+        const idToken = String(req.body?.idToken || '');
+        if (!idToken) {
+            return res.status(400).json({ message: 'Google token is required' });
+        }
+        if (!GOOGLE_CLIENT_ID) {
+            return res.status(500).json({ message: 'Google auth is not configured on server' });
+        }
+
+        const googleResponse = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`);
+        if (!googleResponse.ok) {
+            return res.status(401).json({ message: 'Invalid Google token' });
+        }
+        const payload = await googleResponse.json();
+        if (payload.aud !== GOOGLE_CLIENT_ID) {
+            return res.status(401).json({ message: 'Invalid Google audience' });
+        }
+        const email = String(payload?.email || '').trim().toLowerCase();
+        if (!email) {
+            return res.status(401).json({ message: 'Invalid Google account' });
+        }
+
+        let user = await User.findOne({ email });
+        if (!user) {
+            user = await User.create({
+                email,
+                passwordHash: null,
+                authProvider: 'google'
+            });
+        }
+
+        const token = createToken(user);
+        return res.json({
+            token,
+            user: {
+                id: String(user._id),
+                email: user.email
+            }
+        });
+    } catch (_error) {
+        return res.status(401).json({ message: 'Failed to authenticate with Google' });
+    }
+});
+
 app.get('/api/auth/me', authMiddleware, async (req, res) => {
     res.json({
         user: {
@@ -129,14 +181,31 @@ app.get('/api/auth/me', authMiddleware, async (req, res) => {
     });
 });
 
+const buildDir = path.join(__dirname, 'build');
+const indexHtmlPath = path.join(buildDir, 'index.html');
+
+app.use(express.static(buildDir));
+
+app.get('*', (req, res) => {
+    if (req.path.startsWith('/api/')) {
+        res.status(404).json({ message: 'Not found' });
+        return;
+    }
+    if (fs.existsSync(indexHtmlPath)) {
+        res.sendFile(indexHtmlPath);
+        return;
+    }
+    res.status(503).send('Build not found. Run "npm run build" first.');
+});
+
 const run = async () => {
     await mongoose.connect(MONGO_URI);
-    app.listen(AUTH_PORT, () => {
-        console.info(`Auth server listening on port ${AUTH_PORT}`);
+    app.listen(PORT, () => {
+        console.info(`Unified server listening on port ${PORT}`);
     });
 };
 
 run().catch((error) => {
-    console.error('Failed to start auth server:', error);
+    console.error('Failed to start unified server:', error);
     process.exit(1);
 });

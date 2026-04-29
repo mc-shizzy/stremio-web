@@ -9,11 +9,10 @@ const { Modal, useRouteFocused } = require('stremio-router');
 const { useServices } = require('stremio/services');
 const { useBinaryState } = require('stremio/common');
 const { Button, Image, Checkbox } = require('stremio/components');
-const { loginWithCredentials, registerWithCredentials } = require('stremio/common/customAuth');
+const { loginWithCredentials, registerWithCredentials, loginWithGoogleToken } = require('stremio/common/customAuth');
 const CredentialsTextInput = require('./CredentialsTextInput');
 const PasswordResetModal = require('./PasswordResetModal');
-const useFacebookLogin = require('./useFacebookLogin');
-const { default: useAppleLogin } = require('./useAppleLogin');
+const useGoogleLogin = require('./useGoogleLogin');
 
 const styles = require('./styles');
 
@@ -24,8 +23,7 @@ const Intro = ({ queryParams }) => {
     const { core } = useServices();
     const { t } = useTranslation();
     const routeFocused = useRouteFocused();
-    const [startFacebookLogin, stopFacebookLogin] = useFacebookLogin();
-    const [startAppleLogin, stopAppleLogin] = useAppleLogin();
+    const [startGoogleLogin] = useGoogleLogin();
     const emailRef = React.useRef(null);
     const passwordRef = React.useRef(null);
     const confirmPasswordRef = React.useRef(null);
@@ -84,59 +82,6 @@ const Intro = ({ queryParams }) => {
             error: ''
         }
     );
-    const loginWithFacebook = React.useCallback(() => {
-        openLoaderModal();
-        startFacebookLogin()
-            .then(({ email, password }) => {
-                core.transport.dispatch({
-                    action: 'Ctx',
-                    args: {
-                        action: 'Authenticate',
-                        args: {
-                            type: 'Login',
-                            email,
-                            password,
-                            facebook: true
-                        }
-                    }
-                });
-            })
-            .catch((error) => {
-                closeLoaderModal();
-                dispatch({ type: 'error', error: error.message });
-            });
-    }, []);
-    const cancelLoginWithFacebook = React.useCallback(() => {
-        stopFacebookLogin();
-        closeLoaderModal();
-    }, []);
-    const loginWithApple = React.useCallback(() => {
-        openLoaderModal();
-        startAppleLogin()
-            .then(({ token, sub, email, name }) => {
-                core.transport.dispatch({
-                    action: 'Ctx',
-                    args: {
-                        action: 'Authenticate',
-                        args: {
-                            type: 'Apple',
-                            token,
-                            sub,
-                            email,
-                            name
-                        }
-                    }
-                });
-            })
-            .catch((error) => {
-                closeLoaderModal();
-                dispatch({ type: 'error', error: error.message });
-            });
-    }, []);
-    const cancelLoginWithApple = React.useCallback(() => {
-        stopAppleLogin();
-        closeLoaderModal();
-    }, []);
     const loginWithEmail = React.useCallback(async () => {
         if (typeof state.email !== 'string' || state.email.length === 0 || !emailRef.current.validity.valid) {
             dispatch({ type: 'error', error: t('INVALID_EMAIL') });
@@ -159,6 +104,18 @@ const Intro = ({ queryParams }) => {
             dispatch({ type: 'error', error: typeof error?.message === 'string' ? error.message : t('ERR_GENERIC') });
         }
     }, [state.email, state.password, t]);
+    const loginWithGoogle = React.useCallback(async () => {
+        openLoaderModal();
+        try {
+            const { idToken } = await startGoogleLogin();
+            await loginWithGoogleToken({ idToken });
+            closeLoaderModal();
+            window.location = '#/';
+        } catch (error) {
+            closeLoaderModal();
+            dispatch({ type: 'error', error: typeof error?.message === 'string' ? error.message : t('ERR_GENERIC') });
+        }
+    }, [startGoogleLogin, t]);
     const loginAsGuest = React.useCallback(() => {
         if (!state.termsAccepted) {
             dispatch({ type: 'error', error: t('MUST_ACCEPT_TERMS') });
@@ -371,13 +328,9 @@ const Intro = ({ queryParams }) => {
                     </Button>
                 </div>
                 <div className={styles['options-container']}>
-                    <Button className={classnames(styles['form-button'], styles['facebook-button'])} onClick={loginWithFacebook}>
-                        <Icon className={styles['icon']} name={'facebook'} />
-                        <div className={styles['label']}>{t('FB_LOGIN')}</div>
-                    </Button>
-                    <Button className={classnames(styles['form-button'], styles['apple-button'])} onClick={loginWithApple}>
-                        <Icon className={styles['icon']} name={'macos'} />
-                        <div className={styles['label']}>{t('APPLE_LOGIN')}</div>
+                    <Button className={classnames(styles['form-button'], styles['google-button'])} onClick={loginWithGoogle}>
+                        <Icon className={styles['icon']} name={'person'} />
+                        <div className={styles['label']}>Continue with Google</div>
                     </Button>
                     {
                         state.form === SIGNUP_FORM ?
@@ -417,7 +370,7 @@ const Intro = ({ queryParams }) => {
                         <div className={styles['loader-container']}>
                             <Icon className={styles['icon']} name={'person'} />
                             <div className={styles['label']}>{t('AUTHENTICATING')}</div>
-                            <Button className={styles['button']} onClick={cancelLoginWithFacebook && cancelLoginWithApple}>
+                            <Button className={styles['button']} onClick={closeLoaderModal}>
                                 {t('BUTTON_CANCEL')}
                             </Button>
                         </div>

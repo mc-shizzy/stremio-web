@@ -66,9 +66,20 @@ const registerWithCredentials = async ({ email, password }) => {
     return payload;
 };
 
+const loginWithGoogleToken = async ({ idToken }) => {
+    const payload = await requestJson(getAuthUrl('/google'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken })
+    });
+    saveAuthSession({ token: payload.token, user: payload.user });
+    return payload;
+};
+
 module.exports = {
     loginWithCredentials,
     registerWithCredentials,
+    loginWithGoogleToken,
     clearAuthSession,
     getAuthToken,
 };
