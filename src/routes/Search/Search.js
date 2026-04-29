@@ -13,6 +13,30 @@ const styles = require('./styles');
 
 const THRESHOLD = 100;
 
+const SearchLoadingSkeleton = () => {
+    return (
+        <div className={styles['loading-container']}>
+            <div className={styles['loading-spinner-wrap']}>
+                <div className={styles['loading-spinner']}>
+                    <div className={styles['loading-spinner-ring']} />
+                    <div className={styles['loading-spinner-ring']} />
+                    <div className={styles['loading-spinner-ring']} />
+                </div>
+                <div className={styles['loading-text']}>Searching...</div>
+            </div>
+            <div className={styles['skeleton-grid']}>
+                {Array.from({ length: 8 }).map((_, i) => (
+                    <div key={i} className={styles['skeleton-card']}>
+                        <div className={styles['skeleton-poster']} />
+                        <div className={styles['skeleton-title']} />
+                        <div className={styles['skeleton-meta']} />
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
 const Search = ({ queryParams }) => {
     const t = useTranslate();
     const [search, loadSearchRows] = useSearch(queryParams);
@@ -74,16 +98,19 @@ const Search = ({ queryParams }) => {
                             </div>
                         </div>
                         :
-                        search.catalogs.length === 0 ?
-                            <div className={styles['message-container']}>
-                                <Image
-                                    className={styles['image']}
-                                    src={require('/assets/images/empty.png')}
-                                    alt={' '}
-                                />
-                                <div className={styles['message-label']}>{ t.string('STREMIO_TV_SEARCH_NO_ADDONS') }</div>
-                            </div>
+                        search.loading ?
+                            <SearchLoadingSkeleton />
                             :
+                            search.catalogs.length === 0 ?
+                                <div className={styles['message-container']}>
+                                    <Image
+                                        className={styles['image']}
+                                        src={require('/assets/images/empty.png')}
+                                        alt={' '}
+                                    />
+                                    <div className={styles['message-label']}>No results found</div>
+                                </div>
+                                :
                             search.catalogs.map((catalog, index) => {
                                 switch (catalog.content?.type) {
                                     case 'Ready': {

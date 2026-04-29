@@ -4,6 +4,7 @@ const React = require('react');
 const { useModelState } = require('stremio/common');
 const { useServices } = require('stremio/services');
 const { getResumeTime } = require('stremio/common/customContinueWatching');
+const { AUDIO_PREFERENCES, resolvePreferredSubjectId } = require('stremio/common/customAudioPreference');
 
 const INFO_API_URL = 'https://apii.freehandyflix.online/api/info';
 const SOURCES_API_URL = 'https://apii.freehandyflix.online/api/sources';
@@ -232,8 +233,15 @@ const useMetaDetails = (urlParams) => {
                 const shouldLoadSources = type === 'movie' || streamQuery !== null;
                 let streams = [];
                 if (shouldLoadSources) {
+                    const preferredSubjectId = await resolvePreferredSubjectId({
+                        subjectId,
+                        title: subject.title || '',
+                        type,
+                        preference: AUDIO_PREFERENCES.FRENCH
+                    });
+                    const preferredAudio = preferredSubjectId !== String(subjectId) ? AUDIO_PREFERENCES.FRENCH : AUDIO_PREFERENCES.ORIGINAL;
                     const query = streamQuery ? `?season=${streamQuery.season}&episode=${streamQuery.episode}` : '';
-                    const sourcesResponse = await fetch(`${SOURCES_API_URL}/${encodeURIComponent(subjectId)}${query}`);
+                    const sourcesResponse = await fetch(`${SOURCES_API_URL}/${encodeURIComponent(preferredSubjectId)}${query}`);
                     if (sourcesResponse.ok) {
                         const sourcesPayload = await sourcesResponse.json();
                         const processedSources = Array.isArray(sourcesPayload?.data?.processedSources) ? sourcesPayload.data.processedSources : [];
@@ -247,9 +255,9 @@ const useMetaDetails = (urlParams) => {
                                     const encoded = await core.transport.encodeStream({ url: streamUrl });
                                     if (typeof encoded === 'string') {
                                         const params = new URLSearchParams({
-                                            customSubjectId: subjectId,
+                                            customSubjectId: String(preferredSubjectId),
                                             customType: type,
-                                            audio: 'french',
+                                            audio: preferredAudio,
                                             title: subject.title || ''
                                         });
                                         if (streamQuery) {

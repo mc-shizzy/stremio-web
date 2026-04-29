@@ -94,7 +94,7 @@
             }  
         }
 
-        .message-container {
+            .message-container {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -116,6 +116,147 @@
                 text-align: center;
                 color: @color-secondaryvariant2-light1-90;
             }
+        }
+
+        // Professional Loading Skeleton
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 3rem 1rem;
+            width: 100%;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .loading-spinner-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .loading-spinner {
+            position: relative;
+            width: 64px;
+            height: 64px;
+            margin-bottom: 1.25rem;
+        }
+
+        .loading-spinner-ring {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            animation: spinRing 1.4s linear infinite;
+
+            &:nth-child(1) {
+                border-top-color: #00925d;
+                animation-delay: 0s;
+            }
+            &:nth-child(2) {
+                inset: 6px;
+                border-right-color: rgba(0, 146, 93, 0.6);
+                animation-delay: 0.15s;
+                animation-direction: reverse;
+            }
+            &:nth-child(3) {
+                inset: 12px;
+                border-bottom-color: rgba(0, 146, 93, 0.3);
+                animation-delay: 0.3s;
+            }
+        }
+
+        @keyframes spinRing {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.7);
+            letter-spacing: 0.02em;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        .skeleton-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 1200px;
+            padding: 0 1rem;
+        }
+
+        .skeleton-card {
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
+        }
+
+        .skeleton-poster {
+            aspect-ratio: 2 / 3;
+            width: 100%;
+            border-radius: 0.75rem;
+            background: linear-gradient(
+                110deg,
+                rgba(255, 255, 255, 0.04) 0%,
+                rgba(255, 255, 255, 0.04) 40%,
+                rgba(255, 255, 255, 0.08) 50%,
+                rgba(255, 255, 255, 0.04) 60%,
+                rgba(255, 255, 255, 0.04) 100%
+            );
+            background-size: 200% 100%;
+            animation: shimmer 1.8s ease-in-out infinite;
+        }
+
+        .skeleton-title {
+            height: 1rem;
+            width: 85%;
+            border-radius: 0.35rem;
+            background: linear-gradient(
+                110deg,
+                rgba(255, 255, 255, 0.06) 0%,
+                rgba(255, 255, 255, 0.06) 40%,
+                rgba(255, 255, 255, 0.1) 50%,
+                rgba(255, 255, 255, 0.06) 60%,
+                rgba(255, 255, 255, 0.06) 100%
+            );
+            background-size: 200% 100%;
+            animation: shimmer 1.8s ease-in-out infinite;
+            animation-delay: 0.1s;
+        }
+
+        .skeleton-meta {
+            height: 0.75rem;
+            width: 55%;
+            border-radius: 0.25rem;
+            background: linear-gradient(
+                110deg,
+                rgba(255, 255, 255, 0.04) 0%,
+                rgba(255, 255, 255, 0.04) 40%,
+                rgba(255, 255, 255, 0.07) 50%,
+                rgba(255, 255, 255, 0.04) 60%,
+                rgba(255, 255, 255, 0.04) 100%
+            );
+            background-size: 200% 100%;
+            animation: shimmer 1.8s ease-in-out infinite;
+            animation-delay: 0.2s;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
     }
 }
@@ -295,6 +436,47 @@
                         padding: 0 1.5rem;
                     }
                 }
+            }
+
+            .loading-container {
+                padding: 2rem 0.75rem;
+            }
+
+            .loading-spinner {
+                width: 48px;
+                height: 48px;
+            }
+
+            .loading-spinner-ring {
+                border-width: 2px;
+
+                &:nth-child(2) {
+                    inset: 5px;
+                }
+                &:nth-child(3) {
+                    inset: 10px;
+                }
+            }
+
+            .loading-text {
+                font-size: 0.95rem;
+            }
+
+            .skeleton-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                gap: 1rem;
+            }
+
+            .skeleton-poster {
+                border-radius: 0.5rem;
+            }
+
+            .skeleton-title {
+                height: 0.85rem;
+            }
+
+            .skeleton-meta {
+                height: 0.6rem;
             }
         }
     }

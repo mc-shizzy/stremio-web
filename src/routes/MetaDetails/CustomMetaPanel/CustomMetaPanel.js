@@ -150,7 +150,8 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
         }
         setLoadingEpisodeId(episode.id);
         try {
-            const response = await fetch(`${SOURCES_API_URL}/${encodeURIComponent(meta.id)}?season=${episode.season}&episode=${episode.episode}`);
+            const useVfId = vfAvailable && vfResolvedId ? vfResolvedId : meta.id;
+            const response = await fetch(`${SOURCES_API_URL}/${encodeURIComponent(useVfId)}?season=${episode.season}&episode=${episode.episode}`);
             if (!response.ok) {
                 throw new Error(`Sources API failed with status ${response.status}`);
             }
@@ -165,7 +166,6 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
             if (typeof encoded !== 'string' || encoded.length === 0) {
                 return;
             }
-            const useVfId = vfAvailable && vfResolvedId ? vfResolvedId : meta.id;
             const params = new URLSearchParams({
                 customSubjectId: String(useVfId),
                 customType: 'series',
@@ -192,7 +192,7 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
         } finally {
             setLoadingEpisodeId((current) => (current === episode.id ? null : current));
         }
-    }, [core, meta?.id]);
+    }, [core, meta?.id, meta?.name, vfAvailable, vfResolvedId]);
 
     const openMovieInPlayer = React.useCallback(async () => {
         if (!meta?.id) {
@@ -200,7 +200,8 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
         }
         setMoviePlayLoading(true);
         try {
-            const response = await fetch(`${SOURCES_API_URL}/${encodeURIComponent(meta.id)}`);
+            const useVfId = vfAvailable && vfResolvedId ? vfResolvedId : meta.id;
+            const response = await fetch(`${SOURCES_API_URL}/${encodeURIComponent(useVfId)}`);
             if (!response.ok) {
                 throw new Error(`Sources API failed with status ${response.status}`);
             }
@@ -215,7 +216,6 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
             if (typeof encoded !== 'string' || encoded.length === 0) {
                 return;
             }
-            const useVfId = vfAvailable && vfResolvedId ? vfResolvedId : meta.id;
             const params = new URLSearchParams({
                 customSubjectId: String(useVfId),
                 customType: 'movie',
@@ -235,7 +235,7 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
         } finally {
             setMoviePlayLoading(false);
         }
-    }, [core, meta?.id]);
+    }, [core, meta?.id, meta?.name, vfAvailable, vfResolvedId]);
 
     // ---- library / share --------------------------------------------------
     const inLibrary = !!libraryItem && libraryItem.removed !== true;
@@ -483,7 +483,9 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
                                     <span>No source</span>
                                 </div>
                             )}
+                        </div>
 
+                        <div className={styles['actions-secondary']}>
                             {libraryItem !== undefined ? (
                                 <Button
                                     className={classnames(styles['btn-outline'], { [styles['btn-active']]: inLibrary })}
@@ -491,12 +493,9 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
                                     title={inLibrary ? 'Remove from Watchlist' : 'Add to Watchlist'}
                                 >
                                     <Icon className={styles['btn-icon']} name={inLibrary ? 'checkmark' : 'add'} />
-                                    <span>{inLibrary ? 'In Watchlist' : 'Add Watchlist'}</span>
+                                    <span>{inLibrary ? 'Watchlist' : 'Watchlist'}</span>
                                 </Button>
                             ) : null}
-                        </div>
-
-                        <div className={styles['actions-secondary']}>
                             <Button
                                 className={classnames(styles['btn-outline'], { [styles['btn-success']]: shareState === 'copied' })}
                                 onClick={handleShare}

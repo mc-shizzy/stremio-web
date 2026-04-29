@@ -6,6 +6,7 @@ const SEARCH_API_URL = 'https://apii.freehandyflix.online/api/search';
 
 const useSearch = (queryParams) => {
     const [catalogs, setCatalogs] = React.useState([]);
+    const [loading, setLoading] = React.useState(false);
     const requestIdRef = React.useRef(0);
     const query = React.useMemo(() => {
         return queryParams.get('search') ?? queryParams.get('query') ?? '';
@@ -15,11 +16,13 @@ const useSearch = (queryParams) => {
         const normalizedQuery = query.trim();
         if (!normalizedQuery) {
             setCatalogs([]);
+            setLoading(false);
             return;
         }
 
         const requestId = ++requestIdRef.current;
         setCatalogs([]);
+        setLoading(true);
 
         const fetchSearchResults = async () => {
             try {
@@ -51,10 +54,12 @@ const useSearch = (queryParams) => {
                             content: mappedItems,
                         }
                     }]);
+                    setLoading(false);
                 }
             } catch (_error) {
                 if (requestId === requestIdRef.current) {
                     setCatalogs([]);
+                    setLoading(false);
                 }
             }
         };
@@ -69,7 +74,8 @@ const useSearch = (queryParams) => {
     const search = React.useMemo(() => ({
         selected: query.length > 0 ? { extra: [['search', query]] } : null,
         catalogs,
-    }), [query, catalogs]);
+        loading,
+    }), [query, catalogs, loading]);
 
     return [search, loadRange];
 };

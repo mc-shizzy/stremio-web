@@ -4,60 +4,31 @@ const React = require('react');
 const PropTypes = require('prop-types');
 const classnames = require('classnames');
 const { useTranslation } = require('react-i18next');
-const { usePlatform, useToast } = require('stremio/common');
+const { useToast } = require('stremio/common');
 const { useServices } = require('stremio/services');
 const Option = require('./Option');
 const styles = require('./styles');
 const { AUDIO_PREFERENCES } = require('stremio/common/customAudioPreference');
 
-const OptionsMenu = React.memo(React.forwardRef(({ className, stream, playbackDevices, extraSubtitlesTracks, selectedExtraSubtitlesTrackId, qualityOptions, selectedQuality, onQualitySelected, audioPreference, onAudioPreferenceSelected }, ref) => {
+const OptionsMenu = React.memo(React.forwardRef(({ className, stream, playbackDevices, qualityOptions, selectedQuality, onQualitySelected, audioPreference, onAudioPreferenceSelected }, ref) => {
     const { t } = useTranslation();
     const { core } = useServices();
-    const platform = usePlatform();
     const toast = useToast();
-    const [streamingUrl, downloadUrl, magnetUrl] = React.useMemo(() => {
+    const [streamingUrl, magnetUrl] = React.useMemo(() => {
         return stream !== null ?
             stream.deepLinks &&
             stream.deepLinks.externalPlayer &&
             [
                 stream.deepLinks.externalPlayer.streaming,
-                stream.deepLinks.externalPlayer.download,
                 stream.deepLinks.externalPlayer.magnet,
             ]
             :
-            [null, null, null];
+            [null, null];
     }, [stream]);
     const externalDevices = React.useMemo(() => {
         return playbackDevices.filter(({ type }) => type === 'external');
     }, [playbackDevices]);
 
-    const subtitlesTrackUrl = React.useMemo(() => {
-        const track = extraSubtitlesTracks?.find(({ id }) => id === selectedExtraSubtitlesTrackId);
-        return track?.fallbackUrl ?? track?.url ?? null;
-    }, [extraSubtitlesTracks, selectedExtraSubtitlesTrackId]);
-
-    const onCopyStreamButtonClick = React.useCallback(() => {
-        if (streamingUrl || downloadUrl) {
-            navigator.clipboard.writeText(streamingUrl || downloadUrl)
-                .then(() => {
-                    toast.show({
-                        type: 'success',
-                        title: 'Copied',
-                        message: t('PLAYER_COPY_STREAM_SUCCESS'),
-                        timeout: 3000
-                    });
-                })
-                .catch((e) => {
-                    console.error(e);
-                    toast.show({
-                        type: 'error',
-                        title: t('ERROR'),
-                        message: `${t('PLAYER_COPY_STREAM_ERROR')}: ${streamingUrl || downloadUrl}`,
-                        timeout: 3000
-                    });
-                });
-        }
-    }, [streamingUrl, downloadUrl]);
     const onCopyMagnetButtonClick = React.useCallback(() => {
         if (magnetUrl) {
             navigator.clipboard.writeText(magnetUrl)
@@ -80,16 +51,6 @@ const OptionsMenu = React.memo(React.forwardRef(({ className, stream, playbackDe
                 });
         }
     }, [magnetUrl]);
-    const onDownloadVideoButtonClick = React.useCallback(() => {
-        if (downloadUrl) {
-            platform.openExternal(downloadUrl);
-        }
-    }, [downloadUrl]);
-
-    const onDownloadSubtitlesClick = React.useCallback(() => {
-        subtitlesTrackUrl && platform.openExternal(subtitlesTrackUrl);
-    }, [subtitlesTrackUrl]);
-
     const onExternalDeviceRequested = React.useCallback((deviceId) => {
         if (streamingUrl) {
             core.transport.dispatch({
@@ -150,45 +111,12 @@ const OptionsMenu = React.memo(React.forwardRef(({ className, stream, playbackDe
                 ))
             }
             {
-                streamingUrl || downloadUrl ?
-                    <Option
-                        icon={'link'}
-                        label={t('CTX_COPY_STREAM_LINK')}
-                        disabled={stream === null}
-                        onClick={onCopyStreamButtonClick}
-                    />
-                    :
-                    null
-            }
-            {
                 magnetUrl ?
                     <Option
                         icon={'magnet-link'}
                         label={t('CTX_COPY_MAGNET_LINK')}
                         disabled={stream === null}
                         onClick={onCopyMagnetButtonClick}
-                    />
-                    :
-                    null
-            }
-            {
-                downloadUrl ?
-                    <Option
-                        icon={'download'}
-                        label={t('CTX_DOWNLOAD_VIDEO')}
-                        disabled={stream === null}
-                        onClick={onDownloadVideoButtonClick}
-                    />
-                    :
-                    null
-            }
-            {
-                subtitlesTrackUrl ?
-                    <Option
-                        icon={'download'}
-                        label={t('CTX_DOWNLOAD_SUBS')}
-                        disabled={stream === null}
-                        onClick={onDownloadSubtitlesClick}
                     />
                     :
                     null
@@ -213,8 +141,6 @@ OptionsMenu.propTypes = {
     className: PropTypes.string,
     stream: PropTypes.object,
     playbackDevices: PropTypes.array,
-    extraSubtitlesTracks: PropTypes.array,
-    selectedExtraSubtitlesTrackId: PropTypes.string,
     qualityOptions: PropTypes.array,
     selectedQuality: PropTypes.number,
     onQualitySelected: PropTypes.func,

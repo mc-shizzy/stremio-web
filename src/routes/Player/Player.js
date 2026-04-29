@@ -89,7 +89,7 @@ const Player = ({ urlParams, queryParams }) => {
     }, []);
 
     const overlayHidden = React.useMemo(() => {
-        return immersed && !casting && video.state.paused !== null && !video.state.paused && !menusOpen;
+        return immersed && !casting && video.state.paused !== null && !menusOpen;
     }, [immersed, casting, video.state.paused, menusOpen]);
 
     const nextVideoPopupDismissed = React.useRef(false);
