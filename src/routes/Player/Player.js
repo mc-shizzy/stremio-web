@@ -251,6 +251,19 @@ const Player = ({ urlParams, queryParams }) => {
         }
     }, []);
 
+    const onBackClick = React.useCallback(() => {
+        if (customPlaybackContext !== null && customPlaybackContext.subjectId) {
+            const detailsUrl = `#/metadetails/${customPlaybackContext.type}/${encodeURIComponent(customPlaybackContext.subjectId)}`;
+            window.location.replace(detailsUrl);
+        } else if (player.metaItem?.content?.content?.id) {
+            const meta = player.metaItem.content.content;
+            const detailsUrl = `#/metadetails/${meta.type}/${encodeURIComponent(meta.id)}`;
+            window.location.replace(detailsUrl);
+        } else {
+            window.history.back();
+        }
+    }, [customPlaybackContext, player.metaItem]);
+
     const onSubtitlesTrackLoaded = React.useCallback(() => {
         toast.show({
             type: 'success',
@@ -1231,6 +1244,7 @@ const Player = ({ urlParams, queryParams }) => {
                 className={classnames(styles['layer'], styles['nav-bar-layer'])}
                 title={player.title !== null ? player.title : ''}
                 backButton={true}
+                onBackClick={onBackClick}
                 fullscreenButton={true}
                 onMouseMove={onBarMouseMove}
                 onMouseOver={onBarMouseMove}

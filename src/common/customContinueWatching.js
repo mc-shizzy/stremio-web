@@ -1,4 +1,5 @@
 const STORAGE_KEY = 'custom_continue_watching_v1';
+const WATCHED_THRESHOLD_SECONDS = 300; // 5 minutes = "watched"
 
 const safeParse = (value) => {
     try {
@@ -93,7 +94,21 @@ const getResumeTime = ({ subjectId, type, season = null, episode = null }) => {
     return typeof entry?.time === 'number' ? entry.time : 0;
 };
 
-const getContinueWatchingSection = () => {
+const hasWatched = ({ subjectId, type, season = null, episode = null }) => {
+    const time = getResumeTime({ subjectId, type, season, episode });
+    return time >= WATCHED_THRESHOLD_SECONDS;
+};
+
+const getProgressPercent = ({ subjectId, type, season = null, episode = null }) => {
+    const key = getEntryKey({ subjectId, type, season, episode });
+    const entry = getEntriesMap()[key];
+    if (!entry || typeof entry.time !== 'number' || typeof entry.duration !== 'number' || entry.duration <= 0) {
+        return 0;
+    }
+    return Math.min(100, Math.max(0, (entry.time / entry.duration) * 100));
+};
+
+const getContinueWatchingItems = () => {
     const entries = Object.values(getEntriesMap())
         .filter((entry) => entry && typeof entry === 'object')
         .sort((left, right) => (right.updatedAt || 0) - (left.updatedAt || 0))
@@ -106,6 +121,7 @@ const getContinueWatchingSection = () => {
         const href = videoId ?
             `#/metadetails/${entry.type}/${encodeURIComponent(entry.subjectId)}/${encodeURIComponent(videoId)}` :
             `#/metadetails/${entry.type}/${encodeURIComponent(entry.subjectId)}`;
+        const progress = entry.duration > 0 ? Math.min(100, Math.max(0, (entry.time / entry.duration) * 100)) : 0;
         return {
             id: entry.subjectId,
             title: entry.title,
@@ -113,15 +129,38 @@ const getContinueWatchingSection = () => {
             type: entry.type,
             year: entry.year || '',
             genre: entry.genre || '',
-            rating: '',
+            season: entry.season,
+            episode: entry.episode,
+            time: entry.time,
+            duration: entry.duration,
+            progress,
+            updatedAt: entry.updatedAt,
             href
         };
     });
+};
+
+// Legacy function for compatibility
+const getContinueWatchingSection = () => {
+    return getContinueWatchingItems().map((item) => ({
+        id: item.id,
+        title: item.title,
+        poster: item.poster,
+        type: item.type,
+        year: item.year,
+        genre: item.genre,
+        rating: '',
+        href: item.href
+    }));
 };
 
 module.exports = {
     saveProgress,
     removeProgress,
     getResumeTime,
-    getContinueWatchingSection
+    hasWatched,
+    getProgressPercent,
+    getContinueWatchingItems,
+    getContinueWatchingSection,
+    WATCHED_THRESHOLD_SECONDS
 };

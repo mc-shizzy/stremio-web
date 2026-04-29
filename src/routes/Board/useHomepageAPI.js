@@ -1,32 +1,64 @@
-// Custom hook to fetch homepage data from external API
+// Custom hook to fetch homepage data from external API with caching
 
 const React = require('react');
-const { getContinueWatchingSection } = require('stremio/common/customContinueWatching');
 
 const API_URL = 'https://apii.freehandyflix.online/api/homepage';
+const CACHE_KEY = 'handyflix_homepage_cache_v1';
+const CACHE_DURATION_MS = 10 * 60 * 1000; // 10 minutes
+
+const getCache = () => {
+    try {
+        const cached = localStorage.getItem(CACHE_KEY);
+        if (!cached) return null;
+        const parsed = JSON.parse(cached);
+        if (Date.now() - parsed.timestamp > CACHE_DURATION_MS) {
+            localStorage.removeItem(CACHE_KEY);
+            return null;
+        }
+        return parsed.data;
+    } catch (_e) {
+        return null;
+    }
+};
+
+const setCache = (data) => {
+    try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify({
+            timestamp: Date.now(),
+            data
+        }));
+    } catch (_e) {
+        // Ignore storage errors
+    }
+};
 
 const useHomepageAPI = () => {
-    const [sections, setSections] = React.useState([]);
-    const [loading, setLoading] = React.useState(true);
+    const [sections, setSections] = React.useState(() => getCache() || []);
+    const [loading, setLoading] = React.useState(() => !getCache());
     const [error, setError] = React.useState(null);
 
     React.useEffect(() => {
         let cancelled = false;
 
         const fetchHomepage = async () => {
+            const cached = getCache();
+            if (cached && cached.length > 0) {
+                setSections(cached);
+                setLoading(false);
+                return;
+            }
+
             try {
                 setLoading(true);
                 setError(null);
                 const response = await fetch(API_URL);
                 const text = await response.text();
-                // Parse only the first JSON object (API may return trailing data)
                 const data = JSON.parse(text);
 
                 if (cancelled) return;
 
                 if (data.status === 'success' && data.data) {
                     const operatingList = data.data.operatingList || [];
-                    // Filter to only sections that have subjects (actual content)
                     const contentSections = operatingList
                         .filter((section) => {
                             return (
@@ -52,12 +84,8 @@ const useHomepageAPI = () => {
                             })),
                         }));
 
-                    const continueWatchingItems = getContinueWatchingSection();
-                    const nextSections = continueWatchingItems.length > 0 ?
-                        [{ title: 'Continue Watching', type: 'CONTINUE_WATCHING', position: -1, items: continueWatchingItems }, ...contentSections]
-                        :
-                        contentSections;
-                    setSections(nextSections);
+                    setSections(contentSections);
+                    setCache(contentSections);
                 } else {
                     setError('Failed to load homepage data');
                 }

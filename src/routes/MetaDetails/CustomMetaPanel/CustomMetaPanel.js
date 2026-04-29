@@ -5,9 +5,10 @@ const ReactDOM = require('react-dom');
 const PropTypes = require('prop-types');
 const classnames = require('classnames');
 const { useServices } = require('stremio/services');
+const { useToast } = require('stremio/common');
 const { Button } = require('stremio/components');
 const { default: Icon } = require('@stremio/stremio-icons/react');
-const { getResumeTime } = require('stremio/common/customContinueWatching');
+const { getResumeTime, hasWatched } = require('stremio/common/customContinueWatching');
 const styles = require('./styles');
 
 const SEARCH_API_URL = 'https://apii.freehandyflix.online/api/search';
@@ -27,6 +28,7 @@ const formatTime = (seconds) => {
 
 const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type, streamPath, libraryItem }) => {
     const { core } = useServices();
+    const toast = useToast();
     const isSeries = type === 'series';
 
     // ---- derived meta -----------------------------------------------------
@@ -250,10 +252,21 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
                     ? { action: 'RemoveFromLibrary', args: meta.id }
                     : { action: 'AddToLibrary', args: meta }
             });
+            toast.show({
+                type: 'success',
+                title: inLibrary ? 'Removed from Watchlist' : 'Added to Watchlist',
+                message: meta.name || '',
+                timeout: 2500
+            });
         } catch (_e) {
-            // ignore
+            toast.show({
+                type: 'error',
+                title: 'Error',
+                message: 'Failed to update watchlist',
+                timeout: 3000
+            });
         }
-    }, [core, inLibrary, meta]);
+    }, [core, inLibrary, meta, toast]);
 
     const handleShare = React.useCallback(async () => {
         const url = typeof window !== 'undefined' ? window.location.href : '';
@@ -657,6 +670,12 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
                                                 season: ep.season,
                                                 episode: ep.episode
                                             });
+                                            const isWatched = hasWatched({
+                                                subjectId: meta?.id,
+                                                type: 'series',
+                                                season: ep.season,
+                                                episode: ep.episode
+                                            });
                                             const epNum = String(ep.episode || 0).padStart(2, '0');
                                             const isCurrent = streamPath?.id === ep.id;
                                             const progressPct = resumeTime > 0
@@ -666,7 +685,7 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
                                                 <button
                                                     key={ep.id}
                                                     type="button"
-                                                    className={classnames(styles['ep-card'], { [styles['ep-card-current']]: isCurrent })}
+                                                    className={classnames(styles['ep-card'], { [styles['ep-card-current']]: isCurrent, [styles['ep-card-watched']]: isWatched })}
                                                     title={ep.title || `Episode ${ep.episode}`}
                                                     onClick={() => openEpisodeInPlayer(ep)}
                                                     disabled={loadingEpisodeId === ep.id}
@@ -675,6 +694,11 @@ const CustomMetaPanel = React.memo(({ className, meta, customInfo, streams, type
                                                         {backdropUrl ? <img src={backdropUrl} alt="" /> : null}
                                                     </div>
                                                     <div className={styles['ep-card-overlay']} aria-hidden="true" />
+                                                    {isWatched ? (
+                                                        <div className={styles['ep-watched-badge']} title="Watched">
+                                                            <Icon name={'checkmark'} />
+                                                        </div>
+                                                    ) : null}
                                                     <span className={styles['ep-card-watermark']}>{epNum}</span>
                                                     <div className={styles['ep-card-body']}>
                                                         <div className={styles['ep-card-tag']}>S{ep.season} {'\u2022'} Episode {ep.episode}</div>
